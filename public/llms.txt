@@ -1,0 +1,19 @@
+# Maeen | مَعِين
+> Your Daily Source of Quran & Authentic Sunnah (معينك اليومي من القرآن والسنة)
+
+Maeen is a world-class bilingual Islamic platform delivering one Quran page daily with verified tafsir and one authentic Hadith daily.
+
+## Core Principles & Authenticity
+- Quran Source: Medina Mushaf text via Quran.com API v4 & Tanzil.net.
+- Tafsir Allowed: Tafsir As-Sa'di (تيسير الكريم الرحمن) & Tafsir Ibn Kathir.
+- Hadith Sources: Sahih Al-Bukhari, Sahih Muslim, Jami` at-Tirmidhi, Sunan Abu Dawud, An-Nasa'i, Ibn Majah via Sunnah.com API.
+- Zero AI-generated text for Quran, Tafsir, or Hadith. All religious content is strictly authenticated.
+
+## Key Endpoints & Routes
+- Homepage: https://maeen.app/
+- Daily Quran Reader: https://maeen.app/quran
+- Daily Hadith: https://maeen.app/hadith
+- Quran 604 Pages Journey: https://maeen.app/journey
+- Bookmarks & Notes: https://maeen.app/favorites
+- Sources & Attribution: https://maeen.app/sources
+- About & Methodology: https://maeen.app/about
