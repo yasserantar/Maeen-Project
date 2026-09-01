@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Scroll, Compass, ShieldCheck, ArrowLeft, ArrowRight, Sparkles, Bell, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, Scroll, Compass, ShieldCheck, ArrowLeft, ArrowRight, Sparkles, Bell, Star, ChevronLeft, ChevronRight, Languages } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fetchQuranPage } from '@/lib/quran-api';
 import { fetchDailyHadith } from '@/lib/hadith-api';
@@ -15,6 +15,7 @@ export default function HomePage() {
   const [quranData, setQuranData] = useState<QuranPageData | null>(null);
   const [hadithData, setHadithData] = useState<Hadith | null>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'bilingual' | 'english' | 'arabic'>('bilingual');
 
   const { progress } = useUserStore();
   const isAr = progress.language === 'ar';
@@ -85,7 +86,7 @@ export default function HomePage() {
             <p className="text-base sm:text-xl text-gray-200/90 dark:text-gray-100 font-medium leading-relaxed max-w-2xl">
               {isAr
                 ? 'صفحة يومية واحدة من القرآن الكريم بتفسيرها المعتمد، مع حديث نبوي صحيح ونفيس يعالج همومك ويضيء يومك.'
-                : 'One authentic Quran page daily with verified tafsir, accompanied by heart-touching authentic Hadiths for everyday life.'}
+                : 'One authentic Quran page daily with verified English translation (Sahih International) and tafsir, accompanied by authentic prophetic Hadiths.'}
             </p>
           </div>
 
@@ -153,33 +154,62 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <span className="text-xs bg-[#0A382C]/10 text-[#0A382C] dark:bg-[#F0CA50]/20 dark:text-[#F0CA50] px-3.5 py-1.5 rounded-full font-extrabold border border-transparent dark:border-[#F0CA50]/30">
-                {quranData ? (isAr ? `صفحة ${quranData.page_number}` : `Page ${quranData.page_number}`) : '...'}
-              </span>
+              <div className="flex items-center gap-2">
+                {!isAr && (
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 px-2.5 py-1 rounded-lg font-bold">
+                    Sahih International
+                  </span>
+                )}
+                <span className="text-xs bg-[#0A382C]/10 text-[#0A382C] dark:bg-[#F0CA50]/20 dark:text-[#F0CA50] px-3.5 py-1.5 rounded-full font-extrabold border border-transparent dark:border-[#F0CA50]/30">
+                  {quranData ? (isAr ? `صفحة ${quranData.page_number}` : `Page ${quranData.page_number}`) : '...'}
+                </span>
+              </div>
             </div>
 
             {quranData && (
               <div className="space-y-4">
                 {/* Quran Text Preview on Velvet Mushaf Plate */}
                 <div className="p-6 rounded-2xl bg-[#FAF6EC] dark:bg-[#0D1612] border border-[#C9A227]/30 dark:border-[#F0CA50]/35 shadow-inner">
-                  <div className="quran-font text-xl sm:text-2xl leading-[2.6] text-right">
-                    {quranData.verses.slice(0, 4).map(v => (
-                      <span key={v.id} className="inline">
-                        {v.text_uthmani}{' '}
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-sans font-bold text-[#0A382C] dark:text-[#F0CA50] bg-[#0A382C]/10 dark:bg-[#F0CA50]/20 mx-1 align-middle border border-transparent dark:border-[#F0CA50]/30">
-                          {v.verse_number}
-                        </span>{' '}
-                      </span>
-                    ))}
-                    <span className="text-gray-400 font-sans text-sm">...</span>
-                  </div>
+                  {isAr ? (
+                    /* Arabic Mode Display */
+                    <div className="quran-font text-xl sm:text-2xl leading-[2.6] text-right">
+                      {quranData.verses.slice(0, 4).map(v => (
+                        <span key={v.id} className="inline">
+                          {v.text_uthmani}{' '}
+                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-sans font-bold text-[#0A382C] dark:text-[#F0CA50] bg-[#0A382C]/10 dark:bg-[#F0CA50]/20 mx-1 align-middle border border-transparent dark:border-[#F0CA50]/30">
+                            {v.verse_number}
+                          </span>{' '}
+                        </span>
+                      ))}
+                      <span className="text-gray-400 font-sans text-sm">...</span>
+                    </div>
+                  ) : (
+                    /* English Mode: Verified Bilingual Verse-by-Verse with Sahih International */
+                    <div className="space-y-4 text-left">
+                      {quranData.verses.slice(0, 3).map(v => (
+                        <div key={v.id} className="p-3.5 rounded-xl bg-white/60 dark:bg-[#131F1A]/80 border border-gray-200/60 dark:border-white/5 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-extrabold text-[#0A382C] dark:text-[#F0CA50] bg-[#0A382C]/10 dark:bg-[#F0CA50]/20 px-2 py-0.5 rounded-md font-mono">
+                              {v.verse_key}
+                            </span>
+                            <span className="quran-font text-lg text-right text-[#0A382C] dark:text-[#F0CA50]">
+                              {v.text_uthmani}
+                            </span>
+                          </div>
+                          <p className="text-xs sm:text-sm text-gray-800 dark:text-gray-100 font-medium leading-relaxed font-sans">
+                            {v.translations?.[0]?.text || 'Translation loading...'}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Verified Tafsir Snapshot */}
                 <div className="p-4 rounded-2xl bg-emerald-50/80 dark:bg-[#0D241C] border border-emerald-200/70 dark:border-[#1D785E] text-xs sm:text-sm text-gray-800 dark:text-[#E2F0EA] space-y-1.5">
                   <div className="flex items-center gap-1.5 font-bold text-[#0A382C] dark:text-[#F0CA50]">
                     <Sparkles className="w-4 h-4 text-[#F0CA50]" />
-                    <span>{isAr ? 'مقتطف من تفسير السعدي:' : 'Tafsir As-Sa\'di Excerpt:'}</span>
+                    <span>{isAr ? 'مقتطف من تفسير السعدي:' : 'Tafsir As-Sa\'di Excerpt (English):'}</span>
                   </div>
                   <p className="line-clamp-2 leading-relaxed">
                     {isAr ? quranData.tafsir_sadi_ar : quranData.tafsir_sadi_en}
@@ -194,7 +224,7 @@ export default function HomePage() {
               href="/quran"
               className="shimmer-btn w-full py-4 bg-[#0A382C] hover:bg-[#0F4C3A] dark:bg-[#F0CA50] dark:hover:bg-[#D4AF37] text-white dark:text-[#0A261E] font-extrabold text-sm sm:text-base rounded-2xl text-center flex items-center justify-center gap-2 transition-all shadow-md mt-4"
             >
-              <span>{isAr ? 'الانتقال لقراءة الصفحة والتفسير والاستماع' : 'Open Full Page, Tafsir & Recitation'}</span>
+              <span>{isAr ? 'الانتقال لقراءة الصفحة والتفسير والاستماع' : 'Open Full Page, English Translation & Recitation'}</span>
               {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
             </Link>
           </motion.div>

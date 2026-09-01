@@ -5,7 +5,7 @@ import { QuranPageData } from '@/lib/types';
 import { fetchQuranPage } from '@/lib/quran-api';
 import { AudioPlayer } from './AudioPlayer';
 import { ShareModal } from './ShareModal';
-import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Globe, Compass, AlertCircle } from 'lucide-react';
+import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Globe, Compass, AlertCircle, Eye } from 'lucide-react';
 import { useUserStore } from '@/lib/store';
 
 interface QuranReaderProps {
@@ -18,7 +18,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'quran' | 'tafsir' | 'benefits' | 'reflections'>('quran');
   const [activeTafsirSource, setActiveTafsirSource] = useState<'sadi' | 'ibn_kathir'>('sadi');
-  const [showTranslation, setShowTranslation] = useState(false);
+  const [viewMode, setViewMode] = useState<'mushaf' | 'bilingual' | 'english'>('mushaf');
   const [activeVerseIndex, setActiveVerseIndex] = useState<number | null>(null);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [selectedVerseText, setSelectedVerseText] = useState('');
@@ -40,6 +40,13 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
     });
     return () => { isMounted = false; };
   }, [currentPageNum]);
+
+  // Set default view mode based on language
+  useEffect(() => {
+    if (!isAr && viewMode === 'mushaf') {
+      setViewMode('bilingual');
+    }
+  }, [isAr]);
 
   const handleNextPage = () => {
     if (currentPageNum < 604) setCurrentPageNum(prev => prev + 1);
@@ -64,7 +71,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
           <button
             onClick={isAr ? handlePrevPage : handleNextPage}
             disabled={isAr ? currentPageNum <= 1 : currentPageNum >= 604}
-            className="p-2.5 rounded-2xl bg-white dark:bg-gray-800 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all shadow-2xs border border-gray-200/60 dark:border-gray-700"
+            className="p-2.5 rounded-2xl bg-white dark:bg-[#131F1A] disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-[#1C2E27] transition-all shadow-2xs border border-gray-200/60 dark:border-white/10"
             title={isAr ? 'الصفحة السابقة' : 'Previous Page'}
           >
             <ChevronRight className="w-5 h-5" />
@@ -72,10 +79,10 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
           
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-xl text-[#0A382C] dark:text-[#E5C158]">
+              <span className="font-extrabold text-xl text-[#0A382C] dark:text-[#F0CA50]">
                 {isAr ? (pageData?.surah_name_ar || 'جاري التحميل...') : (pageData?.surah_name_en || 'Loading...')}
               </span>
-              <span className="text-xs bg-[#0A382C]/10 text-[#0A382C] dark:bg-[#E5C158]/20 dark:text-[#F3D57B] px-3 py-1 rounded-full font-bold border border-transparent dark:border-[#E5C158]/30">
+              <span className="text-xs bg-[#0A382C]/10 text-[#0A382C] dark:bg-[#F0CA50]/20 dark:text-[#F0CA50] px-3 py-1 rounded-full font-bold border border-transparent dark:border-[#F0CA50]/30">
                 {isAr ? `الجزء ${pageData?.juz_number || 1}` : `Juz ${pageData?.juz_number || 1}`}
               </span>
             </div>
@@ -87,7 +94,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
           <button
             onClick={isAr ? handleNextPage : handlePrevPage}
             disabled={isAr ? currentPageNum >= 604 : currentPageNum <= 1}
-            className="p-2.5 rounded-2xl bg-white dark:bg-gray-800 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all shadow-2xs border border-gray-200/60 dark:border-gray-700"
+            className="p-2.5 rounded-2xl bg-white dark:bg-[#131F1A] disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-[#1C2E27] transition-all shadow-2xs border border-gray-200/60 dark:border-white/10"
             title={isAr ? 'الصفحة التالية' : 'Next Page'}
           >
             <ChevronLeft className="w-5 h-5" />
@@ -102,15 +109,15 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             max="604"
             value={currentPageNum}
             onChange={(e) => setCurrentPageNum(parseInt(e.target.value))}
-            className="w-32 sm:w-48 accent-[#C9A227] dark:accent-[#E5C158]"
+            className="w-32 sm:w-48 accent-[#C9A227] dark:accent-[#F0CA50]"
           />
 
           <button
             onClick={() => togglePageCompletion(currentPageNum)}
             className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${
               isCompleted
-                ? 'bg-emerald-600 text-white'
-                : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-emerald-800'
+                ? 'bg-emerald-600 dark:bg-emerald-500 text-white'
+                : 'bg-emerald-50 text-emerald-700 dark:bg-[#0D241C] dark:text-emerald-300 hover:bg-emerald-100 border border-emerald-200 dark:border-[#1D785E]'
             }`}
           >
             <CheckCircle className="w-4 h-4" />
@@ -125,8 +132,8 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             onClick={() => toggleBookmark('page', currentPageNum, isAr ? `${pageData?.surah_name_ar || 'صفحة'} - صفحة ${currentPageNum}` : `${pageData?.surah_name_en || 'Page'} - Page ${currentPageNum}`)}
             className={`p-2 rounded-xl border transition-colors ${
               isBookmarked
-                ? 'bg-[#C9A227] text-white border-[#C9A227]'
-                : 'border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-[#C9A227] dark:bg-[#F0CA50] text-white dark:text-[#0A261E] border-[#C9A227] dark:border-[#F0CA50]'
+                : 'border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-[#1C2E27]'
             }`}
             title={isAr ? 'حفظ الصفحة' : 'Bookmark Page'}
           >
@@ -135,7 +142,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
 
           <button
             onClick={openShareForPage}
-            className="p-2 rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            className="p-2 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-[#1C2E27] transition-colors"
             title={isAr ? 'مشاركة' : 'Share'}
           >
             <Share2 className="w-4 h-4" />
@@ -150,8 +157,8 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             onClick={() => setActiveTab('quran')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all font-bold ${
               activeTab === 'quran'
-                ? 'bg-[#0A382C] text-white dark:bg-[#E5C158] dark:text-[#060A08] shadow-md'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1C2E27]'
             }`}
           >
             <BookOpen className="w-4 h-4" />
@@ -162,8 +169,8 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             onClick={() => setActiveTab('tafsir')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all font-bold ${
               activeTab === 'tafsir'
-                ? 'bg-[#0A382C] text-white dark:bg-[#E5C158] dark:text-[#060A08] shadow-md'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1C2E27]'
             }`}
           >
             <FileText className="w-4 h-4" />
@@ -174,11 +181,11 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             onClick={() => setActiveTab('benefits')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all font-bold ${
               activeTab === 'benefits'
-                ? 'bg-[#0A382C] text-white dark:bg-[#E5C158] dark:text-[#060A08] shadow-md'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1C2E27]'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-[#C9A227] dark:text-[#060A08]" />
+            <Sparkles className="w-4 h-4 text-[#F0CA50] dark:text-[#0A261E]" />
             <span>{isAr ? 'الفوائد والتدبر' : 'Key Learnings'}</span>
           </button>
 
@@ -186,28 +193,49 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             onClick={() => setActiveTab('reflections')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl transition-all font-bold ${
               activeTab === 'reflections'
-                ? 'bg-[#0A382C] text-white dark:bg-[#E5C158] dark:text-[#060A08] shadow-md'
-                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1C2E27]'
             }`}
           >
-            <Compass className="w-4 h-4 text-[#C9A227] dark:text-[#060A08]" />
+            <Compass className="w-4 h-4 text-[#F0CA50] dark:text-[#0A261E]" />
             <span>{isAr ? 'لطائف وإعجاز بياني' : 'Linguistic & Scientific Gems'}</span>
           </button>
         </div>
 
-        {/* Optional Translation Toggle */}
+        {/* View Mode Switcher */}
         {activeTab === 'quran' && (
-          <button
-            onClick={() => setShowTranslation(!showTranslation)}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-colors ${
-              showTranslation
-                ? 'bg-[#C9A227] text-white border-[#C9A227] dark:bg-[#E5C158] dark:text-[#060A08]'
-                : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-            }`}
-          >
-            <Globe className="w-3.5 h-3.5" />
-            <span>{isAr ? (showTranslation ? 'إخفاء الترجمة الإنجليزية' : 'عرض الترجمة الإنجليزية') : (showTranslation ? 'Hide English Translation' : 'Show English Translation')}</span>
-          </button>
+          <div className="flex items-center bg-gray-100 dark:bg-[#131F1A] p-1 rounded-xl border border-gray-200 dark:border-white/10 text-xs font-bold">
+            <button
+              onClick={() => setViewMode('mushaf')}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                viewMode === 'mushaf'
+                  ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
+            >
+              {isAr ? 'مصحف' : 'Arabic Script'}
+            </button>
+            <button
+              onClick={() => setViewMode('bilingual')}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                viewMode === 'bilingual'
+                  ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
+            >
+              {isAr ? 'مزدوج مع الترجمة' : 'Bilingual'}
+            </button>
+            <button
+              onClick={() => setViewMode('english')}
+              className={`px-3 py-1.5 rounded-lg transition-all ${
+                viewMode === 'english'
+                  ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs'
+                  : 'text-gray-600 dark:text-gray-400'
+              }`}
+            >
+              {isAr ? 'إنجليزي فقط' : 'English Only'}
+            </button>
+          </div>
         )}
       </div>
 
@@ -215,7 +243,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
       <div className="glass-panel rounded-3xl p-6 sm:p-10 shadow-lg min-h-[450px] border border-[var(--border-color)]">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-4">
-            <div className="w-12 h-12 border-4 border-[#C9A227] border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-12 h-12 border-4 border-[#F0CA50] border-t-transparent rounded-full animate-spin"></div>
             <span className="text-sm text-gray-500 font-medium">
               {isAr ? 'جاري تحميل آيات الصفحة المباركة...' : 'Loading Quran verses...'}
             </span>
@@ -234,55 +262,104 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
 
                 {/* Bismillah Header if start of surah */}
                 {pageData.verses.some(v => v.verse_number === 1) && (
-                  <div className="text-center py-5 quran-font text-3xl text-[#0A382C] dark:text-[#E5C158] font-bold border-b border-[#C9A227]/25">
+                  <div className="text-center py-5 quran-font text-3xl text-[#0A382C] dark:text-[#F0CA50] font-bold border-b border-[#F0CA50]/25">
                     بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ
                   </div>
                 )}
 
-                {/* Crisp High-Contrast Mushaf Plate */}
-                <div className="p-6 sm:p-10 rounded-3xl bg-[#FAF6EC] dark:bg-[#090F0C] border border-[#C9A227]/30 dark:border-[#E5C158]/25 shadow-inner">
-                  <div className="quran-font text-2xl sm:text-3xl sm:leading-[2.8] text-right space-x-reverse space-x-2">
+                {/* 1. MUSHAF SCRIPT VIEW */}
+                {viewMode === 'mushaf' && (
+                  <div className="p-6 sm:p-10 rounded-3xl bg-[#FAF6EC] dark:bg-[#0D1612] border border-[#C9A227]/30 dark:border-[#F0CA50]/35 shadow-inner">
+                    <div className="quran-font text-2xl sm:text-3xl sm:leading-[2.8] text-right space-x-reverse space-x-2">
+                      {pageData.verses.map((v, idx) => {
+                        const isActive = activeVerseIndex === idx;
+
+                        return (
+                          <span
+                            key={v.id}
+                            className={`inline rounded-xl px-2 py-1 transition-all duration-300 cursor-pointer ${
+                              isActive
+                                ? 'bg-[#F0CA50]/25 ring-2 ring-[#F0CA50] shadow-[0_0_15px_rgba(240,202,80,0.25)]'
+                                : 'hover:text-[#F0CA50]'
+                            }`}
+                            title={`آية ${v.verse_number}`}
+                          >
+                            {v.text_uthmani}{' '}
+                            <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-sans font-bold mx-1 align-middle transition-colors ${
+                              isActive
+                                ? 'bg-[#F0CA50] text-[#0A261E]'
+                                : 'bg-[#0A382C]/10 text-[#0A382C] dark:bg-[#F0CA50]/20 dark:text-[#F0CA50] border border-transparent dark:border-[#F0CA50]/30'
+                            }`}>
+                              {v.verse_number}
+                            </span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. BILINGUAL VERSE-BY-VERSE VIEW */}
+                {viewMode === 'bilingual' && (
+                  <div className="space-y-4">
                     {pageData.verses.map((v, idx) => {
                       const isActive = activeVerseIndex === idx;
 
                       return (
-                        <span
+                        <div
                           key={v.id}
-                          className={`inline rounded-xl px-2 py-1 transition-all duration-300 cursor-pointer ${
+                          className={`p-5 rounded-2xl transition-all border ${
                             isActive
-                              ? 'bg-[#C9A227]/25 dark:bg-[#E5C158]/25 ring-2 ring-[#C9A227] dark:ring-[#E5C158] shadow-[0_0_15px_rgba(201,162,39,0.25)]'
-                              : 'hover:text-[#C9A227] dark:hover:text-[#E5C158]'
+                              ? 'bg-amber-50/90 dark:bg-[#1A2822] border-[#F0CA50] ring-2 ring-[#F0CA50]/50 shadow-md'
+                              : 'bg-white/80 dark:bg-[#101915] border-gray-200 dark:border-white/5'
                           }`}
-                          title={`آية ${v.verse_number}`}
                         >
-                          {v.text_uthmani}{' '}
-                          <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-sans font-bold mx-1 align-middle transition-colors ${
-                            isActive
-                              ? 'bg-[#C9A227] dark:bg-[#E5C158] text-white dark:text-[#060A08]'
-                              : 'bg-[#0A382C]/10 text-[#0A382C] dark:bg-[#E5C158]/20 dark:text-[#F3D57B] border border-transparent dark:border-[#E5C158]/30'
-                          }`}>
-                            {v.verse_number}
-                          </span>
-                        </span>
+                          <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/5 pb-2.5 mb-2.5">
+                            <span className="text-xs font-extrabold text-[#0A382C] dark:text-[#F0CA50] bg-[#0A382C]/10 dark:bg-[#F0CA50]/20 px-2.5 py-1 rounded-lg font-mono">
+                              {v.verse_key}
+                            </span>
+                            <span className="quran-font text-xl text-right text-[#0A382C] dark:text-[#FFFFFF]">
+                              {v.text_uthmani}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-800 dark:text-gray-100 font-sans leading-relaxed">
+                            {v.translations?.[0]?.text || ''}
+                          </p>
+                        </div>
                       );
                     })}
                   </div>
-                </div>
+                )}
 
-                {/* Translation Box (Only if enabled or in English mode) */}
-                {(showTranslation || !isAr) && (
-                  <div className="pt-6 border-t border-[var(--border-color)] space-y-3">
-                    <h4 className="font-bold text-xs text-[#0A382C] dark:text-[#E5C158] uppercase tracking-wider">
-                      English Translation (Sahih International)
-                    </h4>
-                    <div className="space-y-2 text-xs sm:text-sm text-gray-700 dark:text-gray-300 font-sans leading-relaxed">
-                      {pageData.verses.map((v, idx) => (
-                        <p key={v.id} className={activeVerseIndex === idx ? 'font-semibold text-[#0A382C] dark:text-[#E5C158]' : ''}>
-                          <span className="font-bold text-[#0A382C] dark:text-[#E5C158] mr-1">[{v.verse_key}]</span>
-                          {v.translations?.[0]?.text || ''}
-                        </p>
-                      ))}
+                {/* 3. ENGLISH ONLY VIEW */}
+                {viewMode === 'english' && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-[var(--border-color)]">
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        English Translation (Sahih International - Quran.com)
+                      </span>
                     </div>
+                    {pageData.verses.map((v, idx) => {
+                      const isActive = activeVerseIndex === idx;
+
+                      return (
+                        <div
+                          key={v.id}
+                          className={`p-4 rounded-2xl transition-all border ${
+                            isActive
+                              ? 'bg-amber-50/90 dark:bg-[#1A2822] border-[#F0CA50] ring-2 ring-[#F0CA50]/50 shadow-md'
+                              : 'bg-white/80 dark:bg-[#101915] border-gray-200 dark:border-white/5'
+                          }`}
+                        >
+                          <span className="text-xs font-bold text-[#0A382C] dark:text-[#F0CA50] mr-2">
+                            [{v.verse_key}]
+                          </span>
+                          <span className="text-sm text-gray-800 dark:text-gray-100 font-sans leading-relaxed">
+                            {v.translations?.[0]?.text || ''}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -292,15 +369,15 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
               <div className="space-y-6">
                 <div className="flex flex-wrap items-center justify-between border-b border-[var(--border-color)] pb-3 gap-2">
                   <div className="flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-[#0A382C] dark:text-[#E5C158]" />
+                    <Layers className="w-5 h-5 text-[#0A382C] dark:text-[#F0CA50]" />
                     <h3 className="font-bold text-lg">{isAr ? 'اختر التفسير المعتمد' : 'Select Verified Tafsir'}</h3>
                   </div>
 
-                  <div className="flex bg-gray-100 dark:bg-gray-800/80 p-1.5 rounded-2xl text-xs font-bold border border-gray-200/60 dark:border-gray-700">
+                  <div className="flex bg-gray-100 dark:bg-[#131F1A] p-1.5 rounded-2xl text-xs font-bold border border-gray-200/60 dark:border-white/10">
                     <button
                       onClick={() => setActiveTafsirSource('sadi')}
                       className={`px-4 py-2 rounded-xl transition-all ${
-                        activeTafsirSource === 'sadi' ? 'bg-[#0A382C] text-white dark:bg-[#E5C158] dark:text-[#060A08] shadow-xs' : 'text-gray-600 dark:text-gray-300'
+                        activeTafsirSource === 'sadi' ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs' : 'text-gray-600 dark:text-gray-300'
                       }`}
                     >
                       {isAr ? 'تفسير السعدي (تيسير الكريم الرحمن)' : 'Tafsir As-Sa\'di'}
@@ -308,7 +385,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                     <button
                       onClick={() => setActiveTafsirSource('ibn_kathir')}
                       className={`px-4 py-2 rounded-xl transition-all ${
-                        activeTafsirSource === 'ibn_kathir' ? 'bg-[#0A382C] text-white dark:bg-[#E5C158] dark:text-[#060A08] shadow-xs' : 'text-gray-600 dark:text-gray-300'
+                        activeTafsirSource === 'ibn_kathir' ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs' : 'text-gray-600 dark:text-gray-300'
                       }`}
                     >
                       {isAr ? 'تفسير ابن كثير (تفسير القرآن العظيم)' : 'Tafsir Ibn Kathir'}
@@ -316,8 +393,8 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                   </div>
                 </div>
 
-                <div className="p-6 sm:p-8 rounded-3xl bg-[#FAF8F5] dark:bg-[#090F0C] border border-[#C9A227]/30 dark:border-[#E5C158]/30 leading-relaxed text-sm sm:text-base text-gray-800 dark:text-[#FBF9F2] space-y-4 shadow-inner">
-                  <div className="text-xs font-bold text-[#0A382C] dark:text-[#E5C158] pb-2 border-b border-gray-200 dark:border-gray-800">
+                <div className="p-6 sm:p-8 rounded-3xl bg-[#FAF8F5] dark:bg-[#0D1612] border border-[#C9A227]/30 dark:border-[#F0CA50]/30 leading-relaxed text-sm sm:text-base text-gray-800 dark:text-[#FBF9F2] space-y-4 shadow-inner">
+                  <div className="text-xs font-bold text-[#0A382C] dark:text-[#F0CA50] pb-2 border-b border-gray-200 dark:border-white/10">
                     {activeTafsirSource === 'sadi'
                       ? (isAr ? 'المصدر: تفسير الشيخ عبد الرحمن بن ناصر السعدي رحمه الله' : 'Source: Tafsir Shaykh Abd ar-Rahman as-Sa\'di')
                       : (isAr ? 'المصدر: تفسير الحافظ ابن كثير رحمه الله' : 'Source: Tafsir Hafiz Ibn Kathir')}
@@ -333,15 +410,15 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
 
             {activeTab === 'benefits' && pageData && (
               <div className="space-y-6">
-                <div className="flex items-center gap-2 text-[#0A382C] dark:text-[#E5C158] font-bold text-lg border-b border-[var(--border-color)] pb-3">
-                  <Sparkles className="w-5 h-5 fill-[#C9A227] text-[#C9A227]" />
+                <div className="flex items-center gap-2 text-[#0A382C] dark:text-[#F0CA50] font-bold text-lg border-b border-[var(--border-color)] pb-3">
+                  <Sparkles className="w-5 h-5 fill-[#F0CA50] text-[#F0CA50]" />
                   <h3>{isAr ? 'فوائد وتدبر صفحة اليوم' : 'Key Learnings & Reflection'}</h3>
                 </div>
 
                 <ul className="space-y-3">
                   {(isAr ? pageData.benefits_ar : pageData.benefits_en)?.map((b, idx) => (
-                    <li key={idx} className="flex items-start gap-3.5 p-5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/70 dark:border-emerald-800/70 text-sm text-gray-800 dark:text-gray-200 shadow-2xs">
-                      <span className="w-7 h-7 rounded-xl bg-[#0A382C] text-white dark:bg-[#E5C158] dark:text-[#060A08] flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
+                    <li key={idx} className="flex items-start gap-3.5 p-5 rounded-2xl bg-emerald-50/70 dark:bg-[#0D241C] border border-emerald-200/70 dark:border-[#1D785E] text-sm text-gray-800 dark:text-gray-200 shadow-2xs">
+                      <span className="w-7 h-7 rounded-xl bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] flex items-center justify-center text-xs font-bold shrink-0 shadow-xs">
                         {idx + 1}
                       </span>
                       <span className="leading-relaxed">{b}</span>
@@ -353,15 +430,15 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
 
             {activeTab === 'reflections' && pageData && (
               <div className="space-y-6">
-                <div className="flex items-center gap-2 text-[#0A382C] dark:text-[#E5C158] font-bold text-lg border-b border-[var(--border-color)] pb-3">
-                  <Compass className="w-5 h-5 text-[#C9A227]" />
+                <div className="flex items-center gap-2 text-[#0A382C] dark:text-[#F0CA50] font-bold text-lg border-b border-[var(--border-color)] pb-3">
+                  <Compass className="w-5 h-5 text-[#F0CA50]" />
                   <h3>{isAr ? 'لطائف بيانية وإشارات إعجازية وتأملات' : 'Linguistic Gems & Reflections'}</h3>
                 </div>
 
                 {/* Linguistic Gem */}
                 <div className="p-6 rounded-3xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/70 space-y-2">
-                  <span className="text-xs font-bold text-amber-900 dark:text-[#E5C158] uppercase tracking-wider flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#C9A227]" />
+                  <span className="text-xs font-bold text-amber-900 dark:text-[#F0CA50] uppercase tracking-wider flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-[#F0CA50]" />
                     {isAr ? 'لطيفة بيانية ولغوية موثقة:' : 'Scholarly Linguistic Nuance:'}
                   </span>
                   <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
@@ -381,10 +458,10 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                 </div>
 
                 {/* AI-Assisted Reflection */}
-                <div className="p-6 rounded-3xl bg-[#0A382C]/5 dark:bg-[#E5C158]/10 border border-[#0A382C]/15 dark:border-[#E5C158]/25 space-y-3">
+                <div className="p-6 rounded-3xl bg-[#0A382C]/5 dark:bg-[#F0CA50]/10 border border-[#0A382C]/15 dark:border-[#F0CA50]/25 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#0A382C] dark:text-[#E5C158] flex items-center gap-1.5">
-                      <Sparkles className="w-4 h-4 text-[#C9A227] fill-[#C9A227]" />
+                    <span className="text-xs font-bold text-[#0A382C] dark:text-[#F0CA50] flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-[#F0CA50] fill-[#F0CA50]" />
                       {isAr ? 'إضاءة واستنباط بياني ذكي:' : 'AI Thematic Reflection Insight:'}
                     </span>
                     <span className="text-[10px] bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2.5 py-0.5 rounded-full font-bold">
