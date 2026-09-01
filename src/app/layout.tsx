@@ -43,19 +43,6 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'مَعِين | Maeen',
-    url: 'https://maeen-app-five.vercel.app',
-    description: 'منصة إسلامية موثوقة تقدم صفحة يومية من القرآن الكريم مع التفسير المعتمد وحديثاً صحيحاً يومياً من أمهات كتب السنة النبوية.',
-    inLanguage: ['ar', 'en'],
-    publisher: {
-      '@type': 'Organization',
-      name: 'Maeen Platform'
-    }
-  };
-
   return (
     <div className="antialiased min-h-screen flex flex-col justify-between">
       <Navbar
@@ -84,13 +71,30 @@ export default function RootLayout({
     <html lang="ar" dir="rtl">
       <head>
         <title>مَعِين | معينك اليومي من القرآن والسنة</title>
-        <meta name="description" content="صفحة يومية من القرآن الكريم بتفسير موثق وحديث صحيح يومي من أمهات كتب السنة النبوية." />
+        <meta name="description" content="منصة إسلامية موثوقة تقدم صفحة يومية من القرآن الكريم مع التفسير المعتمد وتلاوة متواصلة، مع حديث نبوي صحيح وأثره في حياتنا اليومية." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#0F4C3A" />
+        <meta name="theme-color" content="#0A382C" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="مَعِين" />
+
+        {/* OpenGraph / Social Media Card Metadata for LinkedIn, Facebook, WhatsApp */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://maeen-app-five.vercel.app" />
+        <meta property="og:title" content="مَعِين | معينك اليومي من القرآن والسنة" />
+        <meta property="og:description" content="صفحة يومية من القرآن الكريم برسم مصحف المدينة بتفسيرها وتلاوتها، مع حديث نبوي صحيح وأثره العملي في حياتنا." />
+        <meta property="og:image" content="https://maeen-app-five.vercel.app/opengraph-image" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="منصة مَعِين" />
+
+        {/* Twitter Card Metadata */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://maeen-app-five.vercel.app" />
+        <meta name="twitter:title" content="مَعِين | معينك اليومي من القرآن والسنة" />
+        <meta name="twitter:description" content="صفحة يومية من القرآن الكريم بتفسيرها وتلاوتها، مع حديث نبوي صحيح وأثره العملي." />
+        <meta name="twitter:image" content="https://maeen-app-five.vercel.app/opengraph-image" />
       </head>
       <body>
         <UserStoreProvider>

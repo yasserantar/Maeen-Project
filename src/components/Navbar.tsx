@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Scroll, Compass, Bookmark, Info, Search, Sun, Moon, Languages, Download, Bell, User, Flame, Cloud, MessageSquarePlus } from 'lucide-react';
+import { BookOpen, Scroll, Compass, Bookmark, Info, Search, Sun, Moon, Languages, Download, Bell, User, Flame, Cloud, MessageSquarePlus, Puzzle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUserStore } from '@/lib/store';
 import { AuthModal } from './AuthModal';
 import { FeedbackModal } from './FeedbackModal';
+import { ExtensionInstallModal } from './ExtensionInstallModal';
 
 interface NavbarProps {
   onOpenSearch: () => void;
@@ -19,6 +20,7 @@ export function Navbar({ onOpenSearch, onOpenNotifications, onInstallApp, canIns
   const { progress, setLanguage, setTheme } = useUserStore();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isExtensionOpen, setIsExtensionOpen] = useState(false);
   const isAr = progress.language === 'ar';
 
   return (
@@ -77,6 +79,18 @@ export function Navbar({ onOpenSearch, onOpenNotifications, onInstallApp, canIns
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
+              {/* Chrome / Edge Extension Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsExtensionOpen(true)}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600/15 to-amber-500/15 hover:from-emerald-600/25 hover:to-amber-500/25 text-[#0A382C] dark:text-[#F0CA50] transition-all flex items-center gap-1.5 text-xs font-extrabold border border-[#F0CA50]/30 shadow-2xs"
+                title={isAr ? 'إضافة المتصفح والتنبيه اليومي' : 'Browser Extension & Daily Reminder'}
+              >
+                <Puzzle className="w-3.5 h-3.5 text-[#F0CA50]" />
+                <span className="hidden sm:inline">{isAr ? 'إضافة المتصفح' : 'Extension'}</span>
+              </motion.button>
+
               {/* Feedback / Report Error Icon Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -117,33 +131,6 @@ export function Navbar({ onOpenSearch, onOpenNotifications, onInstallApp, canIns
                 )}
               </motion.button>
 
-              {/* Notification Settings Button */}
-              {onOpenNotifications && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onOpenNotifications}
-                  className="p-2.5 rounded-xl bg-[#0A382C]/10 hover:bg-[#0A382C]/20 dark:bg-[#F0CA50]/15 dark:hover:bg-[#F0CA50]/25 text-[#0A382C] dark:text-[#F0CA50] transition-colors border border-transparent dark:border-[#F0CA50]/25"
-                  title={isAr ? 'تنبيهات الورد اليومي' : 'Daily Reminder Settings'}
-                >
-                  <Bell className="w-4 h-4" />
-                </motion.button>
-              )}
-
-              {/* PWA Install Button */}
-              {canInstall && onInstallApp && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onInstallApp}
-                  className="px-3.5 py-2 text-xs font-extrabold rounded-xl bg-[#F0CA50] text-[#0A261E] hover:bg-[#D4AF37] transition-all flex items-center gap-1.5 shadow-xs"
-                  title={isAr ? 'تثبيت التطبيق على الشاشة' : 'Install App'}
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">{isAr ? 'تثبيت' : 'Install'}</span>
-                </motion.button>
-              )}
-
               {/* Search Trigger */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -183,6 +170,7 @@ export function Navbar({ onOpenSearch, onOpenNotifications, onInstallApp, canIns
 
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
       <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
+      <ExtensionInstallModal isOpen={isExtensionOpen} onClose={() => setIsExtensionOpen(false)} />
     </>
   );
 }
