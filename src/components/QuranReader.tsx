@@ -1,16 +1,22 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { QuranPageData } from '@/lib/types';
 import { fetchQuranPage } from '@/lib/quran-api';
 import { AudioPlayer } from './AudioPlayer';
 import { ShareModal } from './ShareModal';
-import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Globe, Compass, AlertCircle, Eye } from 'lucide-react';
+import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Compass, AlertCircle, Copy, Check, ZoomIn, ZoomOut } from 'lucide-react';
 import { useUserStore } from '@/lib/store';
 
 interface QuranReaderProps {
   initialPage?: number;
 }
+
+const FONT_SIZES = [
+  { label: 'S', size: 'text-xl sm:text-2xl sm:leading-[2.4]' },
+  { label: 'M', size: 'text-2xl sm:text-3xl sm:leading-[2.8]' },
+  { label: 'L', size: 'text-3xl sm:text-4xl sm:leading-[3.2]' },
+];
 
 export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
   const [currentPageNum, setCurrentPageNum] = useState(initialPage);
@@ -20,6 +26,8 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
   const [activeTafsirSource, setActiveTafsirSource] = useState<'sadi' | 'ibn_kathir'>('sadi');
   const [viewMode, setViewMode] = useState<'mushaf' | 'bilingual' | 'english'>('mushaf');
   const [activeVerseIndex, setActiveVerseIndex] = useState<number | null>(null);
+  const [fontSizeIndex, setFontSizeIndex] = useState(1); // M (Default)
+  const [copiedAyahKey, setCopiedAyahKey] = useState<string | null>(null);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [selectedVerseText, setSelectedVerseText] = useState('');
 
@@ -48,12 +56,38 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
     }
   }, [isAr]);
 
-  const handleNextPage = () => {
+  const handleNextPage = useCallback(() => {
     if (currentPageNum < 604) setCurrentPageNum(prev => prev + 1);
-  };
+  }, [currentPageNum]);
 
-  const handlePrevPage = () => {
+  const handlePrevPage = useCallback(() => {
     if (currentPageNum > 1) setCurrentPageNum(prev => prev - 1);
+  }, [currentPageNum]);
+
+  // Keyboard navigation for page turning
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
+      if (e.key === 'ArrowRight') {
+        if (isAr) handlePrevPage();
+        else handleNextPage();
+      } else if (e.key === 'ArrowLeft') {
+        if (isAr) handleNextPage();
+        else handlePrevPage();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAr, handleNextPage, handlePrevPage]);
+
+  const handleCopyVerse = (verseKey: string, arabicText: string, translation?: string) => {
+    const textToCopy = isAr
+      ? `﴿ ${arabicText} ﴾ [${pageData?.surah_name_ar || ''} : ${verseKey}] - عبر منصة مَعِين`
+      : `"${translation || arabicText}" [${pageData?.surah_name_en || ''} : ${verseKey}] - via Maeen Platform`;
+
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedAyahKey(verseKey);
+    setTimeout(() => setCopiedAyahKey(null), 2000);
   };
 
   const openShareForPage = () => {
@@ -72,7 +106,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             onClick={isAr ? handlePrevPage : handleNextPage}
             disabled={isAr ? currentPageNum <= 1 : currentPageNum >= 604}
             className="p-2.5 rounded-2xl bg-white dark:bg-[#131F1A] disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-[#1C2E27] transition-all shadow-2xs border border-gray-200/60 dark:border-white/10"
-            title={isAr ? 'الصفحة السابقة' : 'Previous Page'}
+            title={isAr ? 'الصفحة السابقة (سهم يمين)' : 'Previous Page (Right Arrow)'}
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -95,7 +129,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             onClick={isAr ? handleNextPage : handlePrevPage}
             disabled={isAr ? currentPageNum >= 604 : currentPageNum <= 1}
             className="p-2.5 rounded-2xl bg-white dark:bg-[#131F1A] disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-[#1C2E27] transition-all shadow-2xs border border-gray-200/60 dark:border-white/10"
-            title={isAr ? 'الصفحة التالية' : 'Next Page'}
+            title={isAr ? 'الصفحة التالية (سهم يسار)' : 'Next Page (Left Arrow)'}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -150,8 +184,8 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
         </div>
       </div>
 
-      {/* Mode Tabs (Quran / Tafsir / Benefits / Reflections) */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-color)] pb-2 text-sm font-semibold">
+      {/* Mode Tabs & Font Controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-color)] pb-3 text-sm font-semibold">
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveTab('quran')}
@@ -202,39 +236,60 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
           </button>
         </div>
 
-        {/* View Mode Switcher */}
+        {/* View Mode & Font Size Controls */}
         {activeTab === 'quran' && (
-          <div className="flex items-center bg-gray-100 dark:bg-[#131F1A] p-1 rounded-xl border border-gray-200 dark:border-white/10 text-xs font-bold">
-            <button
-              onClick={() => setViewMode('mushaf')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                viewMode === 'mushaf'
-                  ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {isAr ? 'مصحف' : 'Arabic Script'}
-            </button>
-            <button
-              onClick={() => setViewMode('bilingual')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                viewMode === 'bilingual'
-                  ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {isAr ? 'مزدوج مع الترجمة' : 'Bilingual'}
-            </button>
-            <button
-              onClick={() => setViewMode('english')}
-              className={`px-3 py-1.5 rounded-lg transition-all ${
-                viewMode === 'english'
-                  ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              {isAr ? 'إنجليزي فقط' : 'English Only'}
-            </button>
+          <div className="flex items-center gap-2">
+            {/* Font Size Selector */}
+            <div className="flex items-center bg-gray-100 dark:bg-[#131F1A] p-1 rounded-xl border border-gray-200 dark:border-white/10 text-xs font-bold">
+              {FONT_SIZES.map((item, idx) => (
+                <button
+                  key={item.label}
+                  onClick={() => setFontSizeIndex(idx)}
+                  className={`px-2.5 py-1 rounded-lg transition-all ${
+                    fontSizeIndex === idx
+                      ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs'
+                      : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-200'
+                  }`}
+                  title={isAr ? `حجم الخط: ${item.label}` : `Font Size: ${item.label}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            {/* View Mode Switcher */}
+            <div className="flex items-center bg-gray-100 dark:bg-[#131F1A] p-1 rounded-xl border border-gray-200 dark:border-white/10 text-xs font-bold">
+              <button
+                onClick={() => setViewMode('mushaf')}
+                className={`px-3 py-1.5 rounded-lg transition-all ${
+                  viewMode === 'mushaf'
+                    ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs'
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                {isAr ? 'مصحف' : 'Arabic'}
+              </button>
+              <button
+                onClick={() => setViewMode('bilingual')}
+                className={`px-3 py-1.5 rounded-lg transition-all ${
+                  viewMode === 'bilingual'
+                    ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs'
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                {isAr ? 'مزدوج' : 'Bilingual'}
+              </button>
+              <button
+                onClick={() => setViewMode('english')}
+                className={`px-3 py-1.5 rounded-lg transition-all ${
+                  viewMode === 'english'
+                    ? 'bg-[#0A382C] text-white dark:bg-[#F0CA50] dark:text-[#0A261E] shadow-xs'
+                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                {isAr ? 'إنجليزي' : 'English'}
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -270,7 +325,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                 {/* 1. MUSHAF SCRIPT VIEW */}
                 {viewMode === 'mushaf' && (
                   <div className="p-6 sm:p-10 rounded-3xl bg-[#FAF6EC] dark:bg-[#0D1612] border border-[#C9A227]/30 dark:border-[#F0CA50]/35 shadow-inner">
-                    <div className="quran-font text-2xl sm:text-3xl sm:leading-[2.8] text-right space-x-reverse space-x-2">
+                    <div className={`quran-font ${FONT_SIZES[fontSizeIndex].size} text-right space-x-reverse space-x-2`}>
                       {pageData.verses.map((v, idx) => {
                         const isActive = activeVerseIndex === idx;
 
@@ -283,6 +338,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                                 : 'hover:text-[#F0CA50]'
                             }`}
                             title={`آية ${v.verse_number}`}
+                            onClick={() => handleCopyVerse(v.verse_key, v.text_uthmani, v.translations?.[0]?.text)}
                           >
                             {v.text_uthmani}{' '}
                             <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-sans font-bold mx-1 align-middle transition-colors ${
@@ -304,6 +360,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                   <div className="space-y-4">
                     {pageData.verses.map((v, idx) => {
                       const isActive = activeVerseIndex === idx;
+                      const isCopied = copiedAyahKey === v.verse_key;
 
                       return (
                         <div
@@ -315,9 +372,19 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                           }`}
                         >
                           <div className="flex items-center justify-between border-b border-gray-100 dark:border-white/5 pb-2.5 mb-2.5">
-                            <span className="text-xs font-extrabold text-[#0A382C] dark:text-[#F0CA50] bg-[#0A382C]/10 dark:bg-[#F0CA50]/20 px-2.5 py-1 rounded-lg font-mono">
-                              {v.verse_key}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-extrabold text-[#0A382C] dark:text-[#F0CA50] bg-[#0A382C]/10 dark:bg-[#F0CA50]/20 px-2.5 py-1 rounded-lg font-mono">
+                                {v.verse_key}
+                              </span>
+                              <button
+                                onClick={() => handleCopyVerse(v.verse_key, v.text_uthmani, v.translations?.[0]?.text)}
+                                className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                                title={isAr ? 'نسخ الآية والترجمة' : 'Copy verse & translation'}
+                              >
+                                {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                              </button>
+                            </div>
+
                             <span className="quran-font text-xl text-right text-[#0A382C] dark:text-[#FFFFFF]">
                               {v.text_uthmani}
                             </span>
@@ -341,6 +408,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                     </div>
                     {pageData.verses.map((v, idx) => {
                       const isActive = activeVerseIndex === idx;
+                      const isCopied = copiedAyahKey === v.verse_key;
 
                       return (
                         <div
@@ -351,10 +419,19 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                               : 'bg-white/80 dark:bg-[#101915] border-gray-200 dark:border-white/5'
                           }`}
                         >
-                          <span className="text-xs font-bold text-[#0A382C] dark:text-[#F0CA50] mr-2">
-                            [{v.verse_key}]
-                          </span>
-                          <span className="text-sm text-gray-800 dark:text-gray-100 font-sans leading-relaxed">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-[#0A382C] dark:text-[#F0CA50]">
+                              [{v.verse_key}]
+                            </span>
+                            <button
+                              onClick={() => handleCopyVerse(v.verse_key, v.text_uthmani, v.translations?.[0]?.text)}
+                              className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 text-gray-400 hover:text-gray-200 transition-colors"
+                              title="Copy translation"
+                            >
+                              {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
+                          <span className="text-sm text-gray-800 dark:text-gray-100 font-sans leading-relaxed block mt-1">
                             {v.translations?.[0]?.text || ''}
                           </span>
                         </div>
