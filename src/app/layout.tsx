@@ -84,7 +84,7 @@ export default function RootLayout({
         <meta property="og:url" content="https://maeen-app-five.vercel.app" />
         <meta property="og:title" content="مَعِين | معينك اليومي من القرآن والسنة" />
         <meta property="og:description" content="صفحة يومية من القرآن الكريم برسم مصحف المدينة بتفسيرها وتلاوتها، مع حديث نبوي صحيح وأثره العملي في حياتنا." />
-        <meta property="og:image" content="https://maeen-app-five.vercel.app/opengraph-image" />
+        <meta property="og:image" content="https://maeen-app-five.vercel.app/og-image.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:site_name" content="منصة مَعِين" />
@@ -94,7 +94,7 @@ export default function RootLayout({
         <meta name="twitter:url" content="https://maeen-app-five.vercel.app" />
         <meta name="twitter:title" content="مَعِين | معينك اليومي من القرآن والسنة" />
         <meta name="twitter:description" content="صفحة يومية من القرآن الكريم بتفسيرها وتلاوتها، مع حديث نبوي صحيح وأثره العملي." />
-        <meta name="twitter:image" content="https://maeen-app-five.vercel.app/opengraph-image" />
+        <meta name="twitter:image" content="https://maeen-app-five.vercel.app/og-image.png" />
       </head>
       <body>
         <UserStoreProvider>
