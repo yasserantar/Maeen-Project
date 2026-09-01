@@ -2,14 +2,16 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen, Scroll, Compass, Bookmark, Info, Search, Sun, Moon, Languages } from 'lucide-react';
+import { BookOpen, Scroll, Compass, Bookmark, Info, Search, Sun, Moon, Languages, Download } from 'lucide-react';
 import { useUserStore } from '@/lib/store';
 
 interface NavbarProps {
   onOpenSearch: () => void;
+  onInstallApp?: () => void;
+  canInstall?: boolean;
 }
 
-export function Navbar({ onOpenSearch }: NavbarProps) {
+export function Navbar({ onOpenSearch, onInstallApp, canInstall }: NavbarProps) {
   const { progress, setLanguage, setTheme } = useUserStore();
   const isAr = progress.language === 'ar';
 
@@ -64,6 +66,18 @@ export function Navbar({ onOpenSearch }: NavbarProps) {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
+            {/* PWA Install Button */}
+            {canInstall && onInstallApp && (
+              <button
+                onClick={onInstallApp}
+                className="px-3 py-1.5 text-xs font-bold rounded-lg bg-[#C9A227] text-[#0F4C3A] hover:bg-[#a8851c] transition-all flex items-center gap-1.5 shadow-xs"
+                title={isAr ? 'تثبيت التطبيق على الشاشة' : 'Install App'}
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>{isAr ? 'تثبيت التطبيق' : 'Install App'}</span>
+              </button>
+            )}
+
             {/* Search Trigger */}
             <button
               onClick={onOpenSearch}

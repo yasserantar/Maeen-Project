@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './globals.css';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -13,14 +13,43 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
   const { progress } = useUserStore();
   const isAr = progress.language === 'ar';
+
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((reg) => console.log('SW registered', reg))
+        .catch((err) => console.warn('SW reg error', err));
+    }
+
+    const handleBeforeInstall = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+  }, []);
+
+  const handleInstallClick = () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      installPrompt.userChoice.then((choiceResult: any) => {
+        if (choiceResult.outcome === 'accepted') {
+          setInstallPrompt(null);
+        }
+      });
+    }
+  };
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'مَعِين | Maeen',
-    url: 'https://maeen.app',
+    url: 'https://maeen-app-five.vercel.app',
     description: 'منصة إسلامية موثوقة تقدم صفحة يومية من القرآن الكريم مع التفسير المعتمد وحديثاً صحيحاً يومياً من أمهات كتب السنة النبوية.',
     inLanguage: ['ar', 'en'],
     publisher: {
@@ -37,6 +66,9 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0F4C3A" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="مَعِين" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -44,7 +76,11 @@ export default function RootLayout({
       </head>
       <body className="antialiased min-h-screen flex flex-col justify-between">
         <div>
-          <Navbar onOpenSearch={() => setIsSearchOpen(true)} />
+          <Navbar
+            onOpenSearch={() => setIsSearchOpen(true)}
+            onInstallApp={handleInstallClick}
+            canInstall={Boolean(installPrompt)}
+          />
           <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {children}
           </main>
