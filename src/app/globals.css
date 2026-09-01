@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --primary: #0A382C;
   --primary-light: #0F4C3A;
@@ -8,32 +10,32 @@
   --gold: #C9A227;
   --gold-light: #E5C158;
   --gold-hover: #A8851C;
-  --bg-light: #FBF9F5;
+  --bg-light: #FAF8F5;
   --text-dark: #0F1714;
   --text-muted: #52605A;
   --card-bg: #FFFFFF;
-  --card-glass: rgba(255, 255, 255, 0.9);
-  --border-color: #E5DFD3;
+  --card-glass: rgba(255, 255, 255, 0.92);
+  --border-color: #E2DBD0;
   --quran-text: #0C1410;
   --quran-plate-bg: #F8F5EC;
   --quran-plate-border: #D8CEB9;
 }
 
-[data-theme="dark"] {
+.dark, [data-theme="dark"] {
   --primary: #155E49;
   --primary-light: #1D785E;
   --primary-hover: #0F4C3A;
   --gold: #F0CA50;
   --gold-light: #FBE288;
   --gold-hover: #D4AF37;
-  --bg-light: #0B110E;
+  --bg-light: #0B120E;
   --text-dark: #FFFFFF;
-  --text-muted: #B4C4BC;
-  --card-bg: #121C18;
-  --card-glass: rgba(18, 28, 24, 0.88);
+  --text-muted: #B8C7BF;
+  --card-bg: #131F1A;
+  --card-glass: rgba(19, 31, 26, 0.92);
   --border-color: rgba(255, 255, 255, 0.12);
   --quran-text: #FFFFFF;
-  --quran-plate-bg: #101915;
+  --quran-plate-bg: #0D1612;
   --quran-plate-border: rgba(240, 202, 80, 0.35);
 }
 
@@ -61,6 +63,12 @@ body {
   border: 1px solid var(--border-color);
 }
 
+.dark .glass-panel, [data-theme="dark"] .glass-panel {
+  background: rgba(19, 31, 26, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
 .glow-card {
   position: relative;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -71,13 +79,13 @@ body {
   box-shadow: 0 20px 35px -10px rgba(15, 76, 58, 0.15), 0 0 20px 2px rgba(201, 162, 39, 0.1);
 }
 
-[data-theme="dark"] .glow-card {
+.dark .glow-card, [data-theme="dark"] .glow-card {
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-[data-theme="dark"] .glow-card:hover {
-  border-color: rgba(240, 202, 80, 0.45);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 25px 4px rgba(240, 202, 80, 0.18);
+.dark .glow-card:hover, [data-theme="dark"] .glow-card:hover {
+  border-color: rgba(240, 202, 80, 0.5);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 25px 4px rgba(240, 202, 80, 0.2);
 }
 
 /* Shimmer Button Effect */

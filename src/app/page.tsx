@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { BookOpen, Scroll, Compass, ShieldCheck, ArrowLeft, ArrowRight, Sparkles, Bell, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { fetchQuranPage } from '@/lib/quran-api';
 import { fetchDailyHadith } from '@/lib/hadith-api';
 import { QuranPageData, Hadith } from '@/lib/types';
@@ -29,23 +30,37 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="space-y-16">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
+      className="space-y-16"
+    >
       {/* 21st.dev / SupaHero Inspired Master Hero Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0F382C] via-[#0A261E] to-[#0A1A14] dark:from-[#133F32] dark:via-[#0E2921] dark:to-[#0B1813] text-white p-8 sm:p-12 md:p-16 shadow-2xl border border-[#C9A227]/30 dark:border-[#F0CA50]/40">
+      <motion.section
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0F382C] via-[#0A261E] to-[#0A1A14] dark:from-[#154638] dark:via-[#0E2F26] dark:to-[#0B1A15] text-white p-8 sm:p-12 md:p-16 shadow-2xl border border-[#C9A227]/30 dark:border-[#F0CA50]/40"
+      >
         {/* Ambient Radial Lighting Glow */}
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#C9A227]/20 dark:bg-[#F0CA50]/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl space-y-8">
           {/* Floating Pill Badge */}
-          <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/10 dark:bg-black/30 border border-[#C9A227]/50 dark:border-[#F0CA50]/50 text-[#F0CA50] text-xs sm:text-sm font-bold backdrop-blur-md shadow-xs">
+          <motion.div
+            animate={{ y: [0, -4, 0] }}
+            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+            className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/10 dark:bg-black/40 border border-[#C9A227]/50 dark:border-[#F0CA50]/50 text-[#F0CA50] text-xs sm:text-sm font-bold backdrop-blur-md shadow-xs"
+          >
             <span className="flex h-2.5 w-2.5 relative">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#F0CA50] opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#F0CA50]"></span>
             </span>
             <Sparkles className="w-4 h-4 fill-[#F0CA50]" />
             <span>{isAr ? 'منصة القرآن والسنة اليومية الموثقة' : 'Verified Daily Quran & Authentic Sunnah'}</span>
-          </div>
+          </motion.div>
 
           {/* Master Headline */}
           <div className="space-y-4">
@@ -76,41 +91,52 @@ export default function HomePage() {
 
           {/* Action CTAs with Shimmer Animation */}
           <div className="flex flex-wrap items-center gap-4 pt-2">
-            <Link
-              href="/quran"
-              className="shimmer-btn px-7 py-4 rounded-2xl bg-[#F0CA50] hover:bg-[#D4AF37] text-[#0A261E] font-extrabold text-sm sm:text-base shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2.5"
-            >
-              <BookOpen className="w-5 h-5" />
-              <span>{isAr ? 'ابدأ ورد اليوم الآن' : 'Start Today\'s Page'}</span>
-              {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-            </Link>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <Link
+                href="/quran"
+                className="shimmer-btn px-7 py-4 rounded-2xl bg-[#F0CA50] hover:bg-[#D4AF37] text-[#0A261E] font-extrabold text-sm sm:text-base shadow-lg transition-all flex items-center gap-2.5"
+              >
+                <BookOpen className="w-5 h-5" />
+                <span>{isAr ? 'ابدأ ورد اليوم الآن' : 'Start Today\'s Page'}</span>
+                {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+              </Link>
+            </motion.div>
 
-            <Link
-              href="/hadith"
-              className="px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/20 dark:bg-black/30 dark:hover:bg-black/50 text-white font-bold text-sm sm:text-base border border-white/25 backdrop-blur-md hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-            >
-              <Scroll className="w-5 h-5 text-[#F0CA50]" />
-              <span>{isAr ? 'حديث اليوم الصحيح' : 'Today\'s Authentic Hadith'}</span>
-            </Link>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <Link
+                href="/hadith"
+                className="px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/20 dark:bg-black/30 dark:hover:bg-black/50 text-white font-bold text-sm sm:text-base border border-white/25 backdrop-blur-md transition-all flex items-center gap-2"
+              >
+                <Scroll className="w-5 h-5 text-[#F0CA50]" />
+                <span>{isAr ? 'حديث اليوم الصحيح' : 'Today\'s Authentic Hadith'}</span>
+              </Link>
+            </motion.div>
 
-            <button
-              onClick={() => setIsNotificationModalOpen(true)}
-              className="px-5 py-4 rounded-2xl bg-[#F0CA50]/20 hover:bg-[#F0CA50]/30 text-[#FFF5D6] font-bold text-xs sm:text-sm border border-[#F0CA50]/50 backdrop-blur-md transition-all flex items-center gap-2"
-            >
-              <Bell className="w-4 h-4 text-[#F0CA50]" />
-              <span>{isAr ? 'تفعيل التنبيه اليومي' : 'Set Daily Reminder'}</span>
-            </button>
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+              <button
+                onClick={() => setIsNotificationModalOpen(true)}
+                className="px-5 py-4 rounded-2xl bg-[#F0CA50]/20 hover:bg-[#F0CA50]/30 text-[#FFF5D6] font-bold text-xs sm:text-sm border border-[#F0CA50]/50 backdrop-blur-md transition-all flex items-center gap-2"
+              >
+                <Bell className="w-4 h-4 text-[#F0CA50]" />
+                <span>{isAr ? 'تفعيل التنبيه اليومي' : 'Set Daily Reminder'}</span>
+              </button>
+            </motion.div>
           </div>
         </div>
 
         {/* Subtle Geometric Overlay */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none bg-[radial-gradient(#F0CA50_1.5px,transparent_1.5px)] [background-size:24px_24px]" />
-      </section>
+      </motion.section>
 
       {/* Refero / Bento Grid Architecture */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Large Bento Card (7 cols): Today's Quran Page Preview */}
-        <div className="lg:col-span-7 glow-card glass-panel rounded-3xl p-6 sm:p-8 space-y-6 flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="lg:col-span-7 glow-card glass-panel rounded-3xl p-6 sm:p-8 space-y-6 flex flex-col justify-between"
+        >
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-4">
               <div className="flex items-center gap-3">
@@ -118,7 +144,7 @@ export default function HomePage() {
                   <BookOpen className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="font-extrabold text-lg text-[#0A382C] dark:text-[#F0CA50]">
+                  <h2 className="font-extrabold text-lg text-[#0A382C] dark:text-[#FFFFFF]">
                     {isAr ? 'صفحة اليوم من القرآن الكريم' : 'Today\'s Quran Page'}
                   </h2>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
@@ -135,7 +161,7 @@ export default function HomePage() {
             {quranData && (
               <div className="space-y-4">
                 {/* Quran Text Preview on Velvet Mushaf Plate */}
-                <div className="p-6 rounded-2xl bg-[#FAF6EC] dark:bg-[#101915] border border-[#C9A227]/30 dark:border-[#F0CA50]/35 shadow-inner">
+                <div className="p-6 rounded-2xl bg-[#FAF6EC] dark:bg-[#0D1612] border border-[#C9A227]/30 dark:border-[#F0CA50]/35 shadow-inner">
                   <div className="quran-font text-xl sm:text-2xl leading-[2.6] text-right">
                     {quranData.verses.slice(0, 4).map(v => (
                       <span key={v.id} className="inline">
@@ -163,17 +189,24 @@ export default function HomePage() {
             )}
           </div>
 
-          <Link
-            href="/quran"
-            className="shimmer-btn w-full py-4 bg-[#0A382C] hover:bg-[#0F4C3A] dark:bg-[#F0CA50] dark:hover:bg-[#D4AF37] text-white dark:text-[#0A261E] font-extrabold text-sm sm:text-base rounded-2xl text-center flex items-center justify-center gap-2 transition-all shadow-md mt-4"
-          >
-            <span>{isAr ? 'الانتقال لقراءة الصفحة والتفسير والاستماع' : 'Open Full Page, Tafsir & Recitation'}</span>
-            {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-          </Link>
-        </div>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <Link
+              href="/quran"
+              className="shimmer-btn w-full py-4 bg-[#0A382C] hover:bg-[#0F4C3A] dark:bg-[#F0CA50] dark:hover:bg-[#D4AF37] text-white dark:text-[#0A261E] font-extrabold text-sm sm:text-base rounded-2xl text-center flex items-center justify-center gap-2 transition-all shadow-md mt-4"
+            >
+              <span>{isAr ? 'الانتقال لقراءة الصفحة والتفسير والاستماع' : 'Open Full Page, Tafsir & Recitation'}</span>
+              {isAr ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+            </Link>
+          </motion.div>
+        </motion.div>
 
         {/* Side Bento Column (5 cols): Journey & Quick Stats */}
-        <div className="lg:col-span-5 space-y-6 flex flex-col justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="lg:col-span-5 space-y-6 flex flex-col justify-between"
+        >
           {/* Bento Card: Quran Completion Journey Tracker */}
           <div className="glow-card glass-panel rounded-3xl p-6 space-y-5 border border-[var(--border-color)]">
             <div className="flex items-center justify-between">
@@ -239,11 +272,16 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Today's Authentic Hadith Section */}
-      <section className="space-y-6">
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="space-y-6"
+      >
         <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-[#0A382C] text-[#F0CA50] flex items-center justify-center font-bold shadow-xs">
@@ -269,10 +307,15 @@ export default function HomePage() {
         </div>
 
         {hadithData && <HadithCard hadith={hadithData} />}
-      </section>
+      </motion.section>
 
       {/* 21st.dev Style Notification Banner */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0F382C] via-[#0A261E] to-[#0A1A14] dark:from-[#133F32] dark:via-[#0E2921] dark:to-[#0B1813] text-white p-8 sm:p-12 shadow-xl border border-[#C9A227]/35 dark:border-[#F0CA50]/40 text-center space-y-6">
+      <motion.section
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: 0.4 }}
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0F382C] via-[#0A261E] to-[#0A1A14] dark:from-[#154638] dark:via-[#0E2F26] dark:to-[#0B1A15] text-white p-8 sm:p-12 shadow-xl border border-[#C9A227]/35 dark:border-[#F0CA50]/40 text-center space-y-6"
+      >
         <div className="w-14 h-14 rounded-2xl bg-white/10 dark:bg-black/40 text-[#F0CA50] border border-white/20 dark:border-[#F0CA50]/30 flex items-center justify-center mx-auto shadow-md backdrop-blur-md">
           <Bell className="w-7 h-7" />
         </div>
@@ -289,19 +332,21 @@ export default function HomePage() {
         </div>
 
         <div className="pt-2">
-          <button
-            onClick={() => setIsNotificationModalOpen(true)}
-            className="shimmer-btn px-8 py-4 bg-[#F0CA50] hover:bg-[#D4AF37] text-[#0A261E] font-extrabold text-sm rounded-2xl transition-all shadow-lg hover:scale-105"
-          >
-            {isAr ? 'ضبط وتفعيل التنبيه اليومي' : 'Configure Daily Reminders'}
-          </button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="inline-block">
+            <button
+              onClick={() => setIsNotificationModalOpen(true)}
+              className="shimmer-btn px-8 py-4 bg-[#F0CA50] hover:bg-[#D4AF37] text-[#0A261E] font-extrabold text-sm rounded-2xl transition-all shadow-lg"
+            >
+              {isAr ? 'ضبط وتفعيل التنبيه اليومي' : 'Configure Daily Reminders'}
+            </button>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
 
       <NotificationSettingsModal
         isOpen={isNotificationModalOpen}
         onClose={() => setIsNotificationModalOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 }

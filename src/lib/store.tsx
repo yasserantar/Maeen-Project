@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { UserProgress, Language, NotificationSettings } from './types';
 
-const STORAGE_KEY = 'maeen_user_progress_v3';
+const STORAGE_KEY = 'maeen_user_progress_v5';
 
 const defaultNotifications: NotificationSettings = {
   browserEnabled: false,
@@ -38,6 +38,14 @@ interface UserStoreContextType {
 
 const UserStoreContext = createContext<UserStoreContextType | null>(null);
 
+function applyThemeAndLang(theme: 'light' | 'dark', lang: Language) {
+  if (typeof document === 'undefined') return;
+  document.documentElement.setAttribute('data-theme', theme);
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+  document.documentElement.setAttribute('lang', lang);
+  document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+}
+
 export function UserStoreProvider({ children }: { children: React.ReactNode }) {
   const [progress, setProgress] = useState<UserProgress>(defaultState);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -56,9 +64,9 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
           }
         };
         setProgress(merged);
-        document.documentElement.setAttribute('data-theme', merged.theme);
-        document.documentElement.setAttribute('lang', merged.language);
-        document.documentElement.setAttribute('dir', merged.language === 'ar' ? 'rtl' : 'ltr');
+        applyThemeAndLang(merged.theme, merged.language);
+      } else {
+        applyThemeAndLang('light', 'ar');
       }
     } catch (e) {
       console.warn('LocalStorage error', e);
@@ -95,8 +103,7 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
   const setLanguage = useCallback((lang: Language) => {
     setProgress((prev) => {
       const updated = { ...prev, language: lang };
-      document.documentElement.setAttribute('lang', lang);
-      document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+      applyThemeAndLang(prev.theme, lang);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       } catch (e) {
@@ -107,9 +114,9 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setTheme = useCallback((theme: 'light' | 'dark') => {
-    document.documentElement.setAttribute('data-theme', theme);
     setProgress((prev) => {
       const updated = { ...prev, theme };
+      applyThemeAndLang(theme, prev.language);
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       } catch (e) {
@@ -194,7 +201,6 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
 export function useUserStore() {
   const context = useContext(UserStoreContext);
   if (!context) {
-    // Fallback if rendered outside provider
     return {
       progress: defaultState,
       isLoaded: true,
