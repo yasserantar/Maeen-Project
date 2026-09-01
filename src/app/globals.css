@@ -1,37 +1,112 @@
-@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
-  --primary: #0F4C3A;
-  --primary-hover: #0a382b;
+  --primary: #0A382C;
+  --primary-light: #0F4C3A;
+  --primary-hover: #07261E;
   --gold: #C9A227;
-  --gold-hover: #a8851c;
-  --bg-light: #F8F6F1;
-  --text-dark: #1C2826;
+  --gold-light: #E5C158;
+  --gold-hover: #A8851C;
+  --bg-light: #FAF8F5;
+  --text-dark: #14201B;
+  --text-muted: #62706A;
   --card-bg: #FFFFFF;
-  --border-color: #E2DDD5;
+  --card-glass: rgba(255, 255, 255, 0.88);
+  --border-color: #E8E2D8;
+  --quran-text: #111A16;
+  --quran-bg: #F5F1E8;
 }
 
 [data-theme="dark"] {
-  --bg-light: #0B1210;
-  --text-dark: #F0F4F2;
-  --card-bg: #14211D;
-  --border-color: #233630;
+  --primary: #125844;
+  --primary-light: #1A7057;
+  --primary-hover: #0F4C3A;
+  --gold: #E5C158;
+  --gold-light: #F3D57B;
+  --gold-hover: #C9A227;
+  --bg-light: #060A08;
+  --text-dark: #FBF9F2;
+  --text-muted: #9BA8A2;
+  --card-bg: #0C1411;
+  --card-glass: rgba(12, 20, 17, 0.88);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --quran-text: #FFF8EB;
+  --quran-bg: #090E0C;
 }
 
 body {
   background-color: var(--bg-light);
   color: var(--text-dark);
   font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
 }
 
+/* Crisp high-contrast Quran typography */
 .quran-font {
   font-family: 'Amiri Quran', 'Amiri', serif;
-  line-height: 2.2;
+  line-height: 2.8;
+  word-spacing: 0.18em;
+  color: var(--quran-text);
 }
 
+/* Glassmorphism & Modern Shadows */
+.glass-panel {
+  background: var(--card-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+}
+
+.glow-card {
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glow-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 35px -10px rgba(15, 76, 58, 0.12), 0 0 20px 2px rgba(201, 162, 39, 0.08);
+}
+
+[data-theme="dark"] .glow-card:hover {
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.7), 0 0 25px 3px rgba(229, 193, 88, 0.15);
+}
+
+/* Shimmer Button Effect */
+.shimmer-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmer-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  bottom: -50%;
+  left: -50%;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: rotate(30deg) translate(-100%, -100%);
+  transition: transform 0.8s ease;
+}
+
+.shimmer-btn:hover::after {
+  transform: rotate(30deg) translate(100%, 100%);
+}
+
+/* Audio Waveform Animation */
+@keyframes wavePulse {
+  0%, 100% { height: 4px; }
+  50% { height: 18px; }
+}
+
+.wave-bar-1 { animation: wavePulse 1s ease-in-out infinite; }
+.wave-bar-2 { animation: wavePulse 1s ease-in-out infinite 0.2s; }
+.wave-bar-3 { animation: wavePulse 1s ease-in-out infinite 0.4s; }
+.wave-bar-4 { animation: wavePulse 1s ease-in-out infinite 0.1s; }
+
+/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;

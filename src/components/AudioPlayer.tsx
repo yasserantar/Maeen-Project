@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, SkipForward, SkipBack, RotateCcw } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, SkipForward, SkipBack, Sparkles } from 'lucide-react';
 
 export interface AudioPlayerVerse {
   id: number;
@@ -61,7 +61,6 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
     if (currentVerseIndex < verses.length - 1) {
       const nextIndex = currentVerseIndex + 1;
       setCurrentVerseIndex(nextIndex);
-      // Wait slightly then play next verse
       setTimeout(() => {
         if (audioRef.current) {
           audioRef.current.play().catch(e => console.warn('Next verse play error', e));
@@ -100,64 +99,82 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-center gap-3 bg-[#0F4C3A]/5 dark:bg-[#C9A227]/10 p-3.5 rounded-2xl border border-[#0F4C3A]/15 dark:border-[#C9A227]/25 shadow-xs">
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0A382C]/10 via-[#0F4C3A]/5 to-[#C9A227]/10 dark:from-[#0F4C3A]/20 dark:via-[#14211D] dark:to-[#C9A227]/15 p-4 border border-[#0F4C3A]/15 dark:border-[#C9A227]/20 shadow-xs backdrop-blur-md transition-all">
       <audio
         ref={audioRef}
         src={audioSrc}
         onEnded={handleEnded}
       />
 
-      {/* Control Buttons */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={isAr ? handleNextVerse : handlePrevVerse}
-          disabled={currentVerseIndex <= 0}
-          className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          title={isAr ? 'الآية السابقة' : 'Previous Verse'}
-        >
-          <SkipBack className="w-4 h-4 text-gray-700 dark:text-gray-200" />
-        </button>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Playback Controls */}
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={isAr ? handleNextVerse : handlePrevVerse}
+            disabled={currentVerseIndex <= 0}
+            className="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 disabled:opacity-25 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-all shadow-2xs border border-gray-200/60 dark:border-gray-700"
+            title={isAr ? 'الآية السابقة' : 'Previous Verse'}
+          >
+            <SkipBack className="w-4 h-4 text-gray-700 dark:text-gray-200" />
+          </button>
 
-        <button
-          onClick={togglePlay}
-          className="w-10 h-10 rounded-full bg-[#0F4C3A] text-white flex items-center justify-center hover:scale-105 transition-transform shadow-md shrink-0"
-          title={isPlaying ? (isAr ? 'إيقاف مؤقت' : 'Pause') : (isAr ? 'تشغيل تلاوة الصفحة' : 'Play Page Recitation')}
-        >
-          {isPlaying ? <Pause className="w-5 h-5 fill-white" /> : <Play className="w-5 h-5 fill-white ml-0.5" />}
-        </button>
+          <button
+            onClick={togglePlay}
+            className="w-12 h-12 rounded-2xl bg-[#0A382C] hover:bg-[#0F4C3A] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md shrink-0 border border-[#C9A227]/30"
+            title={isPlaying ? (isAr ? 'إيقاف مؤقت' : 'Pause') : (isAr ? 'تشغيل تلاوة الصفحة' : 'Play Page Recitation')}
+          >
+            {isPlaying ? (
+              <Pause className="w-5 h-5 fill-white" />
+            ) : (
+              <Play className="w-5 h-5 fill-white ml-0.5" />
+            )}
+          </button>
 
-        <button
-          onClick={isAr ? handlePrevVerse : handleNextVerse}
-          disabled={currentVerseIndex >= verses.length - 1}
-          className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          title={isAr ? 'الآية التالية' : 'Next Verse'}
-        >
-          <SkipForward className="w-4 h-4 text-gray-700 dark:text-gray-200" />
-        </button>
-      </div>
-
-      {/* Track Info */}
-      <div className="flex flex-col flex-1 min-w-0 text-center sm:text-right">
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-          <span className="text-xs font-bold text-[#0F4C3A] dark:text-[#C9A227] truncate">
-            {title}
-          </span>
-          <span className="text-[10px] bg-[#0F4C3A]/10 text-[#0F4C3A] dark:bg-[#C9A227]/20 dark:text-[#C9A227] px-2 py-0.5 rounded-md font-bold">
-            {isAr ? `الآية ${currentVerseIndex + 1} من ${verses.length}` : `Verse ${currentVerseIndex + 1} of ${verses.length}`}
-          </span>
+          <button
+            onClick={isAr ? handlePrevVerse : handleNextVerse}
+            disabled={currentVerseIndex >= verses.length - 1}
+            className="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 disabled:opacity-25 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-all shadow-2xs border border-gray-200/60 dark:border-gray-700"
+            title={isAr ? 'الآية التالية' : 'Next Verse'}
+          >
+            <SkipForward className="w-4 h-4 text-gray-700 dark:text-gray-200" />
+          </button>
         </div>
-        <span className="text-[10px] text-gray-500 mt-0.5">
-          {isAr ? 'تلاوة الصفحة كاملة متتابعة - الشيخ مشاري بن راشد العفاسي' : 'Full Page Continuous Recitation - Sheikh Mishary Alafasy'}
-        </span>
-      </div>
 
-      {/* Mute Toggle */}
-      <button
-        onClick={toggleMute}
-        className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-colors"
-      >
-        {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-      </button>
+        {/* Track Details with Live Waveform */}
+        <div className="flex flex-col flex-1 min-w-0 text-center sm:text-right">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <span className="text-xs sm:text-sm font-bold text-[#0A382C] dark:text-[#C9A227] truncate">
+              {title}
+            </span>
+            <span className="text-[10px] bg-[#0A382C]/10 text-[#0A382C] dark:bg-[#C9A227]/20 dark:text-[#C9A227] px-2.5 py-0.5 rounded-full font-bold">
+              {isAr ? `الآية ${currentVerseIndex + 1} من ${verses.length}` : `Verse ${currentVerseIndex + 1} of ${verses.length}`}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-center sm:justify-start gap-2 mt-1 text-[11px] text-gray-500 dark:text-gray-400">
+            <span>{isAr ? 'تلاوة متتابعة: الشيخ مشاري بن راشد العفاسي' : 'Reciter: Sheikh Mishary Rashid Alafasy'}</span>
+            
+            {/* Animated Sound Waveform Indicator */}
+            {isPlaying && (
+              <div className="inline-flex items-center gap-0.5 h-4 ml-1">
+                <span className="w-0.5 bg-[#C9A227] rounded-full wave-bar-1" />
+                <span className="w-0.5 bg-[#C9A227] rounded-full wave-bar-2" />
+                <span className="w-0.5 bg-[#C9A227] rounded-full wave-bar-3" />
+                <span className="w-0.5 bg-[#C9A227] rounded-full wave-bar-4" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Mute Button */}
+        <button
+          onClick={toggleMute}
+          className="p-2.5 rounded-xl bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition-all shadow-2xs border border-gray-200/60 dark:border-gray-700"
+          title={isMuted ? (isAr ? 'إلغاء الكتم' : 'Unmute') : (isAr ? 'كتم الصوت' : 'Mute')}
+        >
+          {isMuted ? <VolumeX className="w-4 h-4 text-red-500" /> : <Volume2 className="w-4 h-4" />}
+        </button>
+      </div>
     </div>
   );
 }
