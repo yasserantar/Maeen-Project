@@ -162,7 +162,7 @@ export default function HomePage() {
                   <span className="font-bold text-[#0F4C3A] dark:text-[#C9A227] block">
                     {isAr ? 'تفسير السعدي لمطلع الصفحة:' : 'Tafsir As-Sa\'di:'}
                   </span>
-                  <p className="line-clamp-2">{quranData.tafsir_sadi}</p>
+                  <p className="line-clamp-2">{isAr ? quranData.tafsir_sadi_ar : quranData.tafsir_sadi_en}</p>
                 </div>
               </div>
             )}

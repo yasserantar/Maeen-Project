@@ -45,8 +45,10 @@ export interface QuranPageData {
   surah_name_en: string;
   juz_number: number;
   verses: Verse[];
-  tafsir_sadi?: string;
-  tafsir_ibn_kathir?: string;
+  tafsir_sadi_ar?: string;
+  tafsir_ibn_kathir_ar?: string;
+  tafsir_sadi_en?: string;
+  tafsir_ibn_kathir_en?: string;
   benefits_ar?: string[];
   benefits_en?: string[];
 }

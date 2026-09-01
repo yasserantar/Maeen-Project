@@ -19,6 +19,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
   const [activeTab, setActiveTab] = useState<'quran' | 'tafsir' | 'benefits'>('quran');
   const [activeTafsirSource, setActiveTafsirSource] = useState<'sadi' | 'ibn_kathir'>('sadi');
   const [showTranslation, setShowTranslation] = useState(false);
+  const [activeVerseIndex, setActiveVerseIndex] = useState<number | null>(null);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [selectedVerseText, setSelectedVerseText] = useState('');
 
@@ -30,6 +31,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
+    setActiveVerseIndex(null);
     fetchQuranPage(currentPageNum).then((data) => {
       if (isMounted) {
         setPageData(data);
@@ -210,10 +212,12 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
           <>
             {activeTab === 'quran' && pageData && (
               <div className="space-y-8">
-                {/* Audio Recitation Player */}
+                {/* Continuous Audio Recitation Player for Full Page */}
                 <AudioPlayer
-                  audioUrl={pageData.verses[0]?.audio_url}
+                  verses={pageData.verses}
                   title={isAr ? `تلاوة صفحة ${currentPageNum} - ${pageData.surah_name_ar}` : `Recitation Page ${currentPageNum} - ${pageData.surah_name_en}`}
+                  isAr={isAr}
+                  onActiveVerseChange={(index) => setActiveVerseIndex(index)}
                 />
 
                 {/* Bismillah Header if start of surah */}
@@ -223,16 +227,32 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                   </div>
                 )}
 
-                {/* Verses Text */}
+                {/* Verses Text with Active Recitation Highlighting */}
                 <div className="quran-font text-2xl sm:text-3xl leading-[2.6] text-right text-gray-900 dark:text-gray-100 space-x-reverse space-x-2">
-                  {pageData.verses.map((v) => (
-                    <span key={v.id} className="inline hover:text-[#C9A227] transition-colors cursor-pointer" title={`آية ${v.verse_number}`}>
-                      {v.text_uthmani}{' '}
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#0F4C3A]/10 text-[#0F4C3A] dark:bg-[#C9A227]/20 dark:text-[#C9A227] text-xs font-sans font-bold mx-1 align-middle">
-                        {v.verse_number}
+                  {pageData.verses.map((v, idx) => {
+                    const isActive = activeVerseIndex === idx;
+
+                    return (
+                      <span
+                        key={v.id}
+                        className={`inline rounded-lg px-1.5 py-0.5 transition-all duration-300 cursor-pointer ${
+                          isActive
+                            ? 'bg-[#C9A227]/25 text-[#0F4C3A] dark:text-[#C9A227] ring-2 ring-[#C9A227] shadow-xs'
+                            : 'hover:text-[#C9A227]'
+                        }`}
+                        title={`آية ${v.verse_number}`}
+                      >
+                        {v.text_uthmani}{' '}
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-sans font-bold mx-1 align-middle transition-colors ${
+                          isActive
+                            ? 'bg-[#C9A227] text-white'
+                            : 'bg-[#0F4C3A]/10 text-[#0F4C3A] dark:bg-[#C9A227]/20 dark:text-[#C9A227]'
+                        }`}>
+                          {v.verse_number}
+                        </span>
                       </span>
-                    </span>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Translation Box (Only if enabled or in English mode) */}
@@ -242,8 +262,8 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                       English Translation (Sahih International)
                     </h4>
                     <div className="space-y-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-sans leading-relaxed">
-                      {pageData.verses.map((v) => (
-                        <p key={v.id}>
+                      {pageData.verses.map((v, idx) => (
+                        <p key={v.id} className={activeVerseIndex === idx ? 'font-semibold text-[#0F4C3A] dark:text-[#C9A227]' : ''}>
                           <span className="font-bold text-[#0F4C3A] dark:text-[#C9A227] mr-1">[{v.verse_key}]</span>
                           {v.translations?.[0]?.text || ''}
                         </p>
@@ -289,7 +309,9 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                       : (isAr ? 'المصدر: تفسير الحافظ ابن كثير رحمه الله' : 'Source: Tafsir Hafiz Ibn Kathir')}
                   </div>
                   <p className="leading-loose">
-                    {activeTafsirSource === 'sadi' ? pageData.tafsir_sadi : pageData.tafsir_ibn_kathir}
+                    {activeTafsirSource === 'sadi'
+                      ? (isAr ? pageData.tafsir_sadi_ar : pageData.tafsir_sadi_en)
+                      : (isAr ? pageData.tafsir_ibn_kathir_ar : pageData.tafsir_ibn_kathir_en)}
                   </p>
                 </div>
               </div>

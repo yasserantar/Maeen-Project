@@ -22,7 +22,7 @@ export const SURAH_NAMES: Record<number, { ar: string; en: string }> = {
   18: { ar: 'الكهف', en: 'Al-Kahf' },
   19: { ar: 'مريم', en: 'Maryam' },
   20: { ar: 'طه', en: 'Taha' },
-  21: { ar: 'الأننبياء', en: 'Al-Anbiya' },
+  21: { ar: 'الأنبياء', en: 'Al-Anbiya' },
   22: { ar: 'الحج', en: 'Al-Hajj' },
   23: { ar: 'المؤمنون', en: 'Al-Mu\'minun' },
   24: { ar: 'النور', en: 'An-Nur' },
@@ -118,7 +118,18 @@ export const SURAH_NAMES: Record<number, { ar: string; en: string }> = {
   114: { ar: 'الناس', en: 'An-Nas' },
 };
 
-// Default static fallback for Page 1 (Al-Fatihah)
+function cleanText(html: string): string {
+  if (!html) return '';
+  return html
+    .replace(/<[^>]*>?/gm, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Fallback data for Page 1 (Al-Fatihah)
 const PAGE_1_FALLBACK: QuranPageData = {
   page_number: 1,
   surah_name_ar: 'سورة الفاتحة',
@@ -133,8 +144,10 @@ const PAGE_1_FALLBACK: QuranPageData = {
     { id: 6, verse_key: '1:6', verse_number: 6, page_number: 1, text_uthmani: 'ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ', translations: [{ id: 1, resource_id: 131, text: 'Guide us to the straight path -' }] },
     { id: 7, verse_key: '1:7', verse_number: 7, page_number: 1, text_uthmani: 'صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ', translations: [{ id: 1, resource_id: 131, text: 'The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray.' }] },
   ],
-  tafsir_sadi: 'سورة الفاتحة مكية، وهي أعظم سورة في القرآن الكريم. اشتملت على إثبات التوحيد بأنواعه الثلاثة: توحيد الربوبية وتوحيد الألوهية وتوحيد الأسماء والصفات، وعلى إثبات النبوة والجزاء والأمر بالعبادة والاستعانة بالله وحده.',
-  tafsir_ibn_kathir: 'تسمى الفاتحة وأم الكتاب وأم القرآن والسبع المثاني. افتتح بها الكتاب وتستفتح بها القراءة في الصلاة.',
+  tafsir_sadi_ar: 'سورة الفاتحة مكية، وهي أعظم سورة في القرآن الكريم. اشتملت على إثبات التوحيد بأنواعه الثلاثة: توحيد الربوبية وتوحيد الألوهية وتوحيد الأسماء والصفات، وعلى إثبات النبوة والجزاء والأمر بالعبادة والاستعانة بالله وحده.',
+  tafsir_ibn_kathir_ar: 'تسمى الفاتحة وأم الكتاب وأم القرآن والسبع المثاني. افتتح بها الكتاب وتستفتح بها القراءة في الصلاة، وتتضمن تماجيد الله والثناء عليه وطلب الهداية إلى الصراط المستقيم.',
+  tafsir_sadi_en: 'Surah Al-Fatihah is a Meccan surah and the greatest surah in the Holy Quran. It encompasses the principles of Islamic monotheism (Tawhid), worship, and seeking guidance.',
+  tafsir_ibn_kathir_en: 'Al-Fatihah is named the Opener of the Book, Umm Al-Kitab (the Mother of the Book), and the Seven Oft-Repeated Verses. It contains praise of Allah and asking for guidance to the Straight Path.',
   benefits_ar: [
     'التأكيد على أن الحمد كله لله رب العالمين في السراء والضراء.',
     'سؤال الله الهداية للصراط المستقيم في كل ركعة من صلواتنا.',
@@ -172,14 +185,34 @@ export async function fetchQuranPage(pageNumber: number): Promise<QuranPageData>
     const chapterId = firstVerse ? parseInt(firstVerse.verse_key.split(':')[0]) : 1;
     const surahInfo = SURAH_NAMES[chapterId] || { ar: `سورة ${chapterId}`, en: `Surah ${chapterId}` };
 
-    // Fetch Tafsir As-Sa'di for first verse of page
-    let tafsirSadi = '';
+    // Fetch Arabic Tafsir As-Sa'di (ID 91) & Arabic Tafsir Ibn Kathir (ID 14)
+    let tafsirSadiAr = '';
+    let tafsirIbnKathirAr = '';
+    let tafsirSadiEn = '';
+    let tafsirIbnKathirEn = '';
+
     if (firstVerse) {
       try {
-        const tafsirRes = await fetch(`https://api.quran.com/api/v4/tafsirs/169/by_ayah/${firstVerse.verse_key}`);
-        if (tafsirRes.ok) {
-          const tafsirJson = await tafsirRes.json();
-          tafsirSadi = tafsirJson.tafsir?.text?.replace(/<[^>]*>?/gm, '') || '';
+        // ID 91: Arabic Tafsir As-Sa'di
+        const resSaadiAr = await fetch(`https://api.quran.com/api/v4/tafsirs/91/by_ayah/${firstVerse.verse_key}`);
+        if (resSaadiAr.ok) {
+          const j = await resSaadiAr.json();
+          tafsirSadiAr = cleanText(j.tafsir?.text || '');
+        }
+
+        // ID 14: Arabic Tafsir Ibn Kathir
+        const resIbnKathirAr = await fetch(`https://api.quran.com/api/v4/tafsirs/14/by_ayah/${firstVerse.verse_key}`);
+        if (resIbnKathirAr.ok) {
+          const j = await resIbnKathirAr.json();
+          tafsirIbnKathirAr = cleanText(j.tafsir?.text || '');
+        }
+
+        // ID 169: English Tafsir Ibn Kathir / Sa'di
+        const resEn = await fetch(`https://api.quran.com/api/v4/tafsirs/169/by_ayah/${firstVerse.verse_key}`);
+        if (resEn.ok) {
+          const j = await resEn.json();
+          tafsirSadiEn = cleanText(j.tafsir?.text || '');
+          tafsirIbnKathirEn = cleanText(j.tafsir?.text || '');
         }
       } catch (e) {
         console.warn('Tafsir fetch error', e);
@@ -192,8 +225,10 @@ export async function fetchQuranPage(pageNumber: number): Promise<QuranPageData>
       surah_name_en: `Surah ${surahInfo.en}`,
       juz_number: firstVerse ? (firstVerse as any).juz_number || Math.ceil(pageNumber / 20) : 1,
       verses,
-      tafsir_sadi: tafsirSadi || PAGE_1_FALLBACK.tafsir_sadi,
-      tafsir_ibn_kathir: PAGE_1_FALLBACK.tafsir_ibn_kathir,
+      tafsir_sadi_ar: tafsirSadiAr || PAGE_1_FALLBACK.tafsir_sadi_ar,
+      tafsir_ibn_kathir_ar: tafsirIbnKathirAr || PAGE_1_FALLBACK.tafsir_ibn_kathir_ar,
+      tafsir_sadi_en: tafsirSadiEn || PAGE_1_FALLBACK.tafsir_sadi_en,
+      tafsir_ibn_kathir_en: tafsirIbnKathirEn || PAGE_1_FALLBACK.tafsir_ibn_kathir_en,
       benefits_ar: [
         `تدبر قراءة الصفحة ${pageNumber} من القرآن الكريم.`,
         'الحرص على العمل بما في هذه الآيات الكريمات.',
