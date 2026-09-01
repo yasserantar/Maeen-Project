@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Scroll, Compass, Bookmark, Info, Search, Sun, Moon, Languages, Download, Bell, User, Flame, Cloud } from 'lucide-react';
+import { BookOpen, Scroll, Compass, Bookmark, Info, Search, Sun, Moon, Languages, Download, Bell, User, Flame, Cloud, MessageSquarePlus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUserStore } from '@/lib/store';
 import { AuthModal } from './AuthModal';
+import { FeedbackModal } from './FeedbackModal';
 
 interface NavbarProps {
   onOpenSearch: () => void;
@@ -17,6 +18,7 @@ interface NavbarProps {
 export function Navbar({ onOpenSearch, onOpenNotifications, onInstallApp, canInstall }: NavbarProps) {
   const { progress, setLanguage, setTheme } = useUserStore();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const isAr = progress.language === 'ar';
 
   return (
@@ -75,6 +77,17 @@ export function Navbar({ onOpenSearch, onOpenNotifications, onInstallApp, canIns
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
+              {/* Feedback / Report Error Icon Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setIsFeedbackOpen(true)}
+                className="p-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-[#F0CA50] transition-colors border border-amber-500/25"
+                title={isAr ? 'أبلغ عن خطأ أو أرسل اقتراحاً' : 'Report Error / Suggestion'}
+              >
+                <MessageSquarePlus className="w-4 h-4" />
+              </motion.button>
+
               {/* User Cloud Profile / Login Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -169,6 +182,7 @@ export function Navbar({ onOpenSearch, onOpenNotifications, onInstallApp, canIns
       </header>
 
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </>
   );
 }

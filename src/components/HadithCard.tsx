@@ -2,10 +2,11 @@
 
 import React, { useState } from 'react';
 import { Hadith } from '@/lib/types';
-import { Bookmark, Share2, ExternalLink, Info, CheckCircle2, Globe, Heart, Sparkles, Copy, Check } from 'lucide-react';
+import { Bookmark, Share2, ExternalLink, Info, CheckCircle2, Globe, Heart, Sparkles, Copy, Check, MessageSquarePlus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUserStore } from '@/lib/store';
 import { ShareModal } from './ShareModal';
+import { FeedbackModal } from './FeedbackModal';
 
 interface HadithCardProps {
   hadith: Hadith;
@@ -18,6 +19,7 @@ export function HadithCard({ hadith }: HadithCardProps) {
   const [showEnglishTranslation, setShowEnglishTranslation] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   const isBookmarked = progress.bookmarks.some(
     b => b.type === 'hadith' && b.id === hadith.id
@@ -147,9 +149,19 @@ export function HadithCard({ hadith }: HadithCardProps) {
         </div>
       )}
 
-      {/* Footer & Source Attribution */}
-      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-4 border-t border-[var(--border-color)]">
-        <span>{isAr ? `المصدر المعتمد: ${hadith.collection_ar}` : `Verified Source: ${hadith.collection}`}</span>
+      {/* Footer & Source Attribution + Feedback Link */}
+      <div className="flex flex-wrap items-center justify-between text-xs text-gray-500 dark:text-gray-400 pt-4 border-t border-[var(--border-color)] gap-3">
+        <div className="flex items-center gap-3">
+          <span>{isAr ? `المصدر: ${hadith.collection_ar}` : `Source: ${hadith.collection}`}</span>
+          <button
+            onClick={() => setIsFeedbackOpen(true)}
+            className="text-[#0A382C] dark:text-[#F0CA50] hover:underline font-bold flex items-center gap-1"
+          >
+            <MessageSquarePlus className="w-3 h-3" />
+            <span>{isAr ? 'تصويب / ملاحظة' : 'Report / Feedback'}</span>
+          </button>
+        </div>
+
         <a
           href={hadith.source_url}
           target="_blank"
@@ -167,6 +179,13 @@ export function HadithCard({ hadith }: HadithCardProps) {
         title={isAr ? `${hadith.collection_ar} - حديث رقم ${hadith.hadith_number}` : `${hadith.collection} - Hadith #${hadith.hadith_number}`}
         text={isAr ? hadith.text_ar : hadith.text_en}
         source={isAr ? `منصة السنة النبوية (${hadith.collection_ar})` : `Sunnah Platform (${hadith.collection})`}
+      />
+
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        initialContext={isAr ? `${hadith.collection_ar} (حديث رقم ${hadith.hadith_number})` : `${hadith.collection} (Hadith #${hadith.hadith_number})`}
+        initialType="error"
       />
     </motion.div>
   );

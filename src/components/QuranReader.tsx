@@ -5,7 +5,8 @@ import { QuranPageData } from '@/lib/types';
 import { fetchQuranPage } from '@/lib/quran-api';
 import { AudioPlayer } from './AudioPlayer';
 import { ShareModal } from './ShareModal';
-import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Compass, AlertCircle, Copy, Check, Maximize2, Minimize2 } from 'lucide-react';
+import { FeedbackModal } from './FeedbackModal';
+import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Compass, AlertCircle, Copy, Check, Maximize2, Minimize2, MessageSquarePlus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUserStore } from '@/lib/store';
 
@@ -31,6 +32,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
   const [copiedAyahKey, setCopiedAyahKey] = useState<string | null>(null);
   const [isZenMode, setIsZenMode] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [selectedVerseText, setSelectedVerseText] = useState('');
 
   const { progress, togglePageCompletion, toggleBookmark } = useUserStore();
@@ -581,12 +583,31 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
         )}
       </div>
 
+      {/* Subtle Page Correction / Feedback Bar */}
+      <div className="flex items-center justify-between p-4 rounded-2xl bg-gray-50 dark:bg-[#101915] border border-gray-200/60 dark:border-white/5 text-xs text-gray-500 dark:text-gray-400">
+        <span>{isAr ? 'هل لاحظت أي ملاحظة أو تصويب في هذه الصفحة؟' : 'Spotted a typo or observation on this page?'}</span>
+        <button
+          onClick={() => setIsFeedbackOpen(true)}
+          className="text-[#0A382C] dark:text-[#F0CA50] hover:underline font-extrabold flex items-center gap-1"
+        >
+          <MessageSquarePlus className="w-3.5 h-3.5" />
+          <span>{isAr ? 'أرسل تصويباً للصفحة' : 'Submit Page Correction'}</span>
+        </button>
+      </div>
+
       <ShareModal
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
         title={isAr ? `${pageData?.surah_name_ar || 'قرآن كريم'} - صفحة ${currentPageNum}` : `${pageData?.surah_name_en || 'Holy Quran'} - Page ${currentPageNum}`}
         text={selectedVerseText}
         source={isAr ? `مصدر القرآن الكريم (مصحف المدينة النبوية - صفحة ${currentPageNum})` : `Quran Source (Medina Mushaf - Page ${currentPageNum})`}
+      />
+
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        initialContext={isAr ? `صفحة ${currentPageNum} (${pageData?.surah_name_ar || ''})` : `Page ${currentPageNum} (${pageData?.surah_name_en || ''})`}
+        initialType="error"
       />
     </div>
   );
