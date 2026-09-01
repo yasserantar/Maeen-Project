@@ -6,13 +6,9 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SearchModal } from '@/components/SearchModal';
 import { NotificationSettingsModal } from '@/components/NotificationSettingsModal';
-import { useUserStore } from '@/lib/store';
+import { UserStoreProvider, useUserStore } from '@/lib/store';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function MainLayoutContent({ children }: { children: React.ReactNode }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
@@ -61,7 +57,31 @@ export default function RootLayout({
   };
 
   return (
-    <html lang={isAr ? 'ar' : 'en'} dir={isAr ? 'rtl' : 'ltr'}>
+    <div className="antialiased min-h-screen flex flex-col justify-between">
+      <Navbar
+        onOpenSearch={() => setIsSearchOpen(true)}
+        onOpenNotifications={() => setIsNotificationOpen(true)}
+        onInstallApp={handleInstallClick}
+        canInstall={Boolean(installPrompt)}
+      />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        {children}
+      </main>
+
+      <Footer />
+      <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+      <NotificationSettingsModal isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
+    </div>
+  );
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="ar" dir="rtl">
       <head>
         <title>مَعِين | معينك اليومي من القرآن والسنة</title>
         <meta name="description" content="صفحة يومية من القرآن الكريم بتفسير موثق وحديث صحيح يومي من أمهات كتب السنة النبوية." />
@@ -71,27 +91,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="مَعِين" />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
       </head>
-      <body className="antialiased min-h-screen flex flex-col justify-between">
-        <div>
-          <Navbar
-            onOpenSearch={() => setIsSearchOpen(true)}
-            onOpenNotifications={() => setIsNotificationOpen(true)}
-            onInstallApp={handleInstallClick}
-            canInstall={Boolean(installPrompt)}
-          />
-          <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </main>
-        </div>
-
-        <Footer />
-        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-        <NotificationSettingsModal isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
+      <body>
+        <UserStoreProvider>
+          <MainLayoutContent>{children}</MainLayoutContent>
+        </UserStoreProvider>
       </body>
     </html>
   );
