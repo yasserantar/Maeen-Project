@@ -37,6 +37,10 @@ export interface Hadith {
   explanation_ar: string;
   explanation_en: string;
   source_url: string;
+  theme_ar?: string;
+  theme_en?: string;
+  life_benefit_ar?: string;
+  life_benefit_en?: string;
 }
 
 export interface QuranPageData {
@@ -51,6 +55,19 @@ export interface QuranPageData {
   tafsir_ibn_kathir_en?: string;
   benefits_ar?: string[];
   benefits_en?: string[];
+  linguistic_gem_ar?: string;
+  linguistic_gem_en?: string;
+  scientific_miracle_ar?: string;
+  scientific_miracle_en?: string;
+  ai_reflection_ar?: string;
+  ai_reflection_en?: string;
+}
+
+export interface NotificationSettings {
+  browserEnabled: boolean;
+  time: string; // e.g. "08:00"
+  email?: string;
+  emailEnabled: boolean;
 }
 
 export interface UserProgress {
@@ -65,4 +82,5 @@ export interface UserProgress {
   notes: Record<number, string>;
   language: Language;
   theme: 'light' | 'dark';
+  notifications: NotificationSettings;
 }

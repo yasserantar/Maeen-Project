@@ -5,7 +5,7 @@ import { QuranPageData } from '@/lib/types';
 import { fetchQuranPage } from '@/lib/quran-api';
 import { AudioPlayer } from './AudioPlayer';
 import { ShareModal } from './ShareModal';
-import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Globe } from 'lucide-react';
+import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Globe, Compass, AlertCircle } from 'lucide-react';
 import { useUserStore } from '@/lib/store';
 
 interface QuranReaderProps {
@@ -16,7 +16,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
   const [currentPageNum, setCurrentPageNum] = useState(initialPage);
   const [pageData, setPageData] = useState<QuranPageData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'quran' | 'tafsir' | 'benefits'>('quran');
+  const [activeTab, setActiveTab] = useState<'quran' | 'tafsir' | 'benefits' | 'reflections'>('quran');
   const [activeTafsirSource, setActiveTafsirSource] = useState<'sadi' | 'ibn_kathir'>('sadi');
   const [showTranslation, setShowTranslation] = useState(false);
   const [activeVerseIndex, setActiveVerseIndex] = useState<number | null>(null);
@@ -143,9 +143,9 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
         </div>
       </div>
 
-      {/* Mode Tabs (Quran / Tafsir / Benefits) */}
+      {/* Mode Tabs (Quran / Tafsir / Benefits / Reflections) */}
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-color)] pb-2 text-sm font-semibold">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveTab('quran')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
@@ -179,7 +179,19 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             }`}
           >
             <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>{isAr ? 'الفوائد والتدبر' : 'Benefits & Reflections'}</span>
+            <span>{isAr ? 'الفوائد والتدبر' : 'Key Learnings'}</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('reflections')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
+              activeTab === 'reflections'
+                ? 'bg-[#0F4C3A] text-white shadow-xs'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <Compass className="w-4 h-4 text-[#C9A227]" />
+            <span>{isAr ? 'لطائف وإعجاز بياني' : 'Linguistic & Scientific Gems'}</span>
           </button>
         </div>
 
@@ -334,6 +346,63 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+
+            {activeTab === 'reflections' && pageData && (
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 text-[#0F4C3A] dark:text-[#C9A227] font-bold text-lg border-b border-[var(--border-color)] pb-3">
+                  <Compass className="w-5 h-5" />
+                  <h3>{isAr ? 'لطائف بيانية وإشارات إعجازية وتأملات' : 'Linguistic Gems & Reflections'}</h3>
+                </div>
+
+                {/* Linguistic Gem */}
+                <div className="p-5 rounded-2xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/70 dark:border-amber-800/70 space-y-2">
+                  <span className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-[#C9A227]" />
+                    {isAr ? 'لطيفة بيانية ولغوية موثقة:' : 'Scholarly Linguistic Nuance:'}
+                  </span>
+                  <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 leading-relaxed font-medium">
+                    {isAr ? pageData.linguistic_gem_ar : pageData.linguistic_gem_en}
+                  </p>
+                </div>
+
+                {/* Scientific / Cosmic Reflection */}
+                <div className="p-5 rounded-2xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-200/70 dark:border-blue-800/70 space-y-2">
+                  <span className="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+                    <Compass className="w-4 h-4 text-blue-600" />
+                    {isAr ? 'إشارة إعجازية وتأمل كوني/نفسي:' : 'Cosmic & Psychological Harmony:'}
+                  </span>
+                  <p className="text-sm sm:text-base text-gray-800 dark:text-gray-200 leading-relaxed">
+                    {isAr ? pageData.scientific_miracle_ar : pageData.scientific_miracle_en}
+                  </p>
+                </div>
+
+                {/* AI-Assisted Reflection with explicit scholarly caution disclaimer */}
+                <div className="p-5 rounded-2xl bg-[#0F4C3A]/5 dark:bg-[#C9A227]/10 border border-[#0F4C3A]/20 dark:border-[#C9A227]/30 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#0F4C3A] dark:text-[#C9A227] flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-[#C9A227] fill-[#C9A227]" />
+                      {isAr ? 'إضاءة واستنباط بياني ذكي:' : 'AI Thematic Reflection Insight:'}
+                    </span>
+                    <span className="text-[10px] bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full font-bold">
+                      {isAr ? 'بمساعدة الذكاء الاصطناعي' : 'AI-Assisted'}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed">
+                    {isAr ? pageData.ai_reflection_ar : pageData.ai_reflection_en}
+                  </p>
+
+                  <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-[11px] text-amber-800 dark:text-amber-300 flex items-start gap-2 leading-relaxed">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+                    <span>
+                      {isAr
+                        ? 'تنبيه وأمانة علمية: هذه الإضاءة هي استنباط بياني تأملي للاستئناس والتدبر والتفكر، ولا تحل محل التفاسير المأثورة المعتمدة عن سلف الأمة وعلماء التفسير.'
+                        : 'Notice: This thematic reflection is an exploratory contemplative insight for reflection and does not replace established scholarly Tafsir.'}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
           </>

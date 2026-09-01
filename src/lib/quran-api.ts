@@ -157,7 +157,13 @@ const PAGE_1_FALLBACK: QuranPageData = {
     'Confirming that all praise belongs solely to Allah, the Lord of all worlds.',
     'Constantly asking Allah for guidance to the Straight Path in every prayer.',
     'Following the footsteps of those favoured by Allah.'
-  ]
+  ],
+  linguistic_gem_ar: 'لطيفة بيانية: تقديم (إِيَّاكَ نَعْبُدُ) على (وَإِيَّاكَ نَسْتَعِينُ) فيه تقديم حق الله تعالى وهو العبادة والتذلل، على حظ العبد ومطلبه وهو الاستعانة والتوفيق.',
+  linguistic_gem_en: 'Linguistic Nuance: Prioritizing "It is You we worship" before "and You we ask for help" places Allah\'s supreme right (worship) before the servant\'s request (divine assistance).',
+  scientific_miracle_ar: 'التوازن النفسي والوجداني: تكرار صفات الرحمة (الرحمن، الرحيم) يمنح النفس سكينة وطمأنينة تخفف من حدة القلق والاضطراب، وهو ما تؤكده دراسات أثر الاستقرار الروحي على الجهاز العصبي.',
+  scientific_miracle_en: 'Psychological & Spiritual Balance: The fourfold repetition of divine mercy creates deep inner serenity, directly reducing cognitive stress and fostering holistic well-being.',
+  ai_reflection_ar: 'إضاءة واستنباط بياني: الانتقال البلاغي من صيغة الغائب (الحمد لله رب العالمين.. الرحمن الرحيم.. مالك يوم الدين) إلى صيغة المخاطب المباشر (إياك نعبد وإياك نستعين) يعكس ارتقاء قلب المؤمن من مجرد المعرفة النظرية بصفات ربه إلى مقام المناجاة والقرب وحضور القلب بين يديه.',
+  ai_reflection_en: 'Reflective Insight: The rhetorical transition (Iltifat) from third-person description of Allah\'s attributes to direct second-person address ("You alone we worship") mirrors the spiritual ascent of the heart from knowing about Allah to speaking intimately with Him.'
 };
 
 export async function fetchQuranPage(pageNumber: number): Promise<QuranPageData> {
@@ -230,15 +236,21 @@ export async function fetchQuranPage(pageNumber: number): Promise<QuranPageData>
       tafsir_sadi_en: tafsirSadiEn || PAGE_1_FALLBACK.tafsir_sadi_en,
       tafsir_ibn_kathir_en: tafsirIbnKathirEn || PAGE_1_FALLBACK.tafsir_ibn_kathir_en,
       benefits_ar: [
-        `تدبر قراءة الصفحة ${pageNumber} من القرآن الكريم.`,
-        'الحرص على العمل بما في هذه الآيات الكريمات.',
-        'الاستعاذة بالله واللجوء إليه عند تلاوة آيات الوعيد، وسؤاله الفضل عند آيات الرحمة.'
+        `تدبر قراءة الصفحة ${pageNumber} من ${surahInfo.ar}.`,
+        'الحرص على العمل بما في هذه الآيات الكريمات وربطها بالسلوك اليومي.',
+        'الاستعاذة بالله واللجوء إليه عند آيات الوعيد، وسؤاله الفضل والجنة عند آيات الرحمة.'
       ],
       benefits_en: [
-        `Reflecting upon Quran Page ${pageNumber}.`,
-        'Striving to act upon the guidance contained in these verses.',
+        `Reflecting upon Quran Page ${pageNumber} (${surahInfo.en}).`,
+        'Striving to implement the divine moral and practical guidance in daily life.',
         'Seeking refuge in Allah during verses of warning and asking for His grace during verses of mercy.'
-      ]
+      ],
+      linguistic_gem_ar: `لطيفة بيانية في ${surahInfo.ar}: الدقة الإعجازية في اختيار المفردات وترتيب الجمل يعكس عظمة البيان الإلهي وتناسق المعاني بما يناسب سياق الآيات ومقاصد السورة.`,
+      linguistic_gem_en: `Linguistic Precision in ${surahInfo.en}: The miraculous arrangement and vocabulary perfectly align with the thematic essence and divine objectives of the verses.`,
+      scientific_miracle_ar: `إشارة إعجازية وتأمل كوني: مطابقة الحقائق القرآنية للنواميس الكونية وتوجيه العقل للتفكر في خلق السماوات والأرض وعجائب تدبير الله في خلقه.`,
+      scientific_miracle_en: `Cosmic & Scientific Harmony: Aligning universal physical realities with divine wisdom, urging the human intellect to contemplate the precision of creation.`,
+      ai_reflection_ar: `إضاءة واستنباط بياني في ${surahInfo.ar}: التأمل في ترابط الآيات وحكم الانتقال بينها يفتح للقارئ آفاقاً واسعة في فهم مقاصد التنزيل وتطبيقها في واقعه المعاصر. (إضاءة للاستئناس والتدبر)`,
+      ai_reflection_en: `Reflective Thematic Insight in ${surahInfo.en}: Contemplating the deep structural harmony across the verses reveals practical guidance for contemporary living.`
     };
   } catch (err) {
     console.warn(`Using fallback data for page ${pageNumber}`, err);

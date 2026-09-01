@@ -5,6 +5,7 @@ import './globals.css';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { SearchModal } from '@/components/SearchModal';
+import { NotificationSettingsModal } from '@/components/NotificationSettingsModal';
 import { useUserStore } from '@/lib/store';
 
 export default function RootLayout({
@@ -13,6 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const { progress } = useUserStore();
   const isAr = progress.language === 'ar';
@@ -78,6 +80,7 @@ export default function RootLayout({
         <div>
           <Navbar
             onOpenSearch={() => setIsSearchOpen(true)}
+            onOpenNotifications={() => setIsNotificationOpen(true)}
             onInstallApp={handleInstallClick}
             canInstall={Boolean(installPrompt)}
           />
@@ -88,6 +91,7 @@ export default function RootLayout({
 
         <Footer />
         <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+        <NotificationSettingsModal isOpen={isNotificationOpen} onClose={() => setIsNotificationOpen(false)} />
       </body>
     </html>
   );

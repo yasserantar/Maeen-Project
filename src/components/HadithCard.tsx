@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Hadith } from '@/lib/types';
-import { Bookmark, Share2, ExternalLink, Info, CheckCircle2, Globe } from 'lucide-react';
+import { Bookmark, Share2, ExternalLink, Info, CheckCircle2, Globe, Heart, Sparkles } from 'lucide-react';
 import { useUserStore } from '@/lib/store';
 import { ShareModal } from './ShareModal';
 
@@ -25,13 +25,19 @@ export function HadithCard({ hadith }: HadithCardProps) {
     <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 sm:p-8 shadow-sm space-y-6 relative transition-all duration-300">
       {/* Header Info */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-color)] pb-4">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="px-3 py-1 bg-[#0F4C3A]/10 text-[#0F4C3A] dark:bg-[#C9A227]/20 dark:text-[#C9A227] font-bold text-xs rounded-full">
             {isAr ? hadith.collection_ar : hadith.collection}
           </span>
           <span className="text-xs text-gray-500 font-medium">
             {isAr ? `حديث رقم ${hadith.hadith_number}` : `Hadith #${hadith.hadith_number}`}
           </span>
+          {hadith.theme_ar && isAr && (
+            <span className="text-[11px] bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 px-2.5 py-0.5 rounded-md font-bold flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-[#C9A227]" />
+              <span>{hadith.theme_ar}</span>
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -72,6 +78,17 @@ export function HadithCard({ hadith }: HadithCardProps) {
         {hadith.text_ar}
       </div>
 
+      {/* Life Benefit / Impact in Daily Life */}
+      {hadith.life_benefit_ar && isAr && (
+        <div className="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-800/60 text-xs sm:text-sm text-gray-800 dark:text-gray-200 space-y-1.5">
+          <div className="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300">
+            <Heart className="w-4 h-4 text-emerald-600 fill-emerald-600" />
+            <span>أثر هذا الحديث في حياتك اليومية:</span>
+          </div>
+          <p className="leading-relaxed">{hadith.life_benefit_ar}</p>
+        </div>
+      )}
+
       {/* Hadith Text English Translation (Only in English mode or if toggled) */}
       {(!isAr || showEnglishTranslation) && (
         <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-sans border-l-2 border-[#0F4C3A] dark:border-[#C9A227] pl-4 py-1 italic">
@@ -86,7 +103,7 @@ export function HadithCard({ hadith }: HadithCardProps) {
           className="flex items-center gap-2 text-xs font-bold text-[#0F4C3A] dark:text-[#C9A227] hover:underline"
         >
           <Info className="w-4 h-4" />
-          <span>{showExplanation ? (isAr ? 'إخفاء الشرح والفوائد' : 'Hide Explanation') : (isAr ? 'عرض الشرح والفوائد' : 'View Explanation')}</span>
+          <span>{showExplanation ? (isAr ? 'إخفاء الشرح والفوائد' : 'Hide Explanation') : (isAr ? 'عرض الشرح والتفصيل العلمي' : 'View Explanation')}</span>
         </button>
 
         {isAr && (

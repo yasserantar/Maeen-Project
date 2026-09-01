@@ -2,16 +2,17 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen, Scroll, Compass, Bookmark, Info, Search, Sun, Moon, Languages, Download } from 'lucide-react';
+import { BookOpen, Scroll, Compass, Bookmark, Info, Search, Sun, Moon, Languages, Download, Bell } from 'lucide-react';
 import { useUserStore } from '@/lib/store';
 
 interface NavbarProps {
   onOpenSearch: () => void;
+  onOpenNotifications?: () => void;
   onInstallApp?: () => void;
   canInstall?: boolean;
 }
 
-export function Navbar({ onOpenSearch, onInstallApp, canInstall }: NavbarProps) {
+export function Navbar({ onOpenSearch, onOpenNotifications, onInstallApp, canInstall }: NavbarProps) {
   const { progress, setLanguage, setTheme } = useUserStore();
   const isAr = progress.language === 'ar';
 
@@ -66,6 +67,17 @@ export function Navbar({ onOpenSearch, onInstallApp, canInstall }: NavbarProps) 
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
+            {/* Notification Settings Button */}
+            {onOpenNotifications && (
+              <button
+                onClick={onOpenNotifications}
+                className="p-2 rounded-lg bg-[#0F4C3A]/10 hover:bg-[#0F4C3A]/20 dark:bg-[#C9A227]/20 dark:hover:bg-[#C9A227]/30 text-[#0F4C3A] dark:text-[#C9A227] transition-colors"
+                title={isAr ? 'تنبيهات الورد اليومي' : 'Daily Reminder Settings'}
+              >
+                <Bell className="w-4 h-4" />
+              </button>
+            )}
+
             {/* PWA Install Button */}
             {canInstall && onInstallApp && (
               <button
