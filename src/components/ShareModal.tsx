@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, Copy, Check, Share2 } from 'lucide-react';
+import { useUserStore } from '@/lib/store';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -13,10 +14,14 @@ interface ShareModalProps {
 
 export function ShareModal({ isOpen, onClose, title, text, source }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
+  const { progress } = useUserStore();
+  const isAr = progress.language === 'ar';
 
   if (!isOpen) return null;
 
-  const fullShareText = `📖 ${title}\n\n"${text}"\n\nالمصدر: ${source}\nعبر منصة مَعِين - معينك اليومي من القرآن والسنة`;
+  const fullShareText = isAr
+    ? `📖 ${title}\n\n"${text}"\n\nالمصدر: ${source}\nعبر منصة مَعِين - معينك اليومي من القرآن والسنة`
+    : `📖 ${title}\n\n"${text}"\n\nSource: ${source}\nVia Maeen Platform - Daily Quran & Sunnah`;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(fullShareText);
@@ -38,7 +43,7 @@ export function ShareModal({ isOpen, onClose, title, text, source }: ShareModalP
         <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
           <div className="flex items-center gap-2 text-[#0F4C3A] dark:text-[#C9A227] font-bold">
             <Share2 className="w-5 h-5" />
-            <h3>مشاركة النص المبارك</h3>
+            <h3>{isAr ? 'مشاركة النص المبارك' : 'Share Content'}</h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
             <X className="w-5 h-5" />
@@ -52,8 +57,8 @@ export function ShareModal({ isOpen, onClose, title, text, source }: ShareModalP
             &ldquo;{text}&rdquo;
           </p>
           <div className="text-xs text-gray-500 pt-2 border-t border-gray-200 dark:border-gray-800 flex justify-between">
-            <span>المصدر: {source}</span>
-            <span className="font-bold text-[#0F4C3A] dark:text-[#C9A227]">مَعِين</span>
+            <span>{isAr ? `المصدر: ${source}` : `Source: ${source}`}</span>
+            <span className="font-bold text-[#0F4C3A] dark:text-[#C9A227]">{isAr ? 'مَعِين' : 'Maeen'}</span>
           </div>
         </div>
 
@@ -63,13 +68,13 @@ export function ShareModal({ isOpen, onClose, title, text, source }: ShareModalP
             onClick={shareToWhatsapp}
             className="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors"
           >
-            <span>واتساب</span>
+            <span>{isAr ? 'واتساب' : 'WhatsApp'}</span>
           </button>
           <button
             onClick={shareToTwitter}
             className="py-2.5 px-4 bg-sky-500 hover:bg-sky-600 text-white rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors"
           >
-            <span>منصة X</span>
+            <span>{isAr ? 'منصة X' : 'Platform X'}</span>
           </button>
         </div>
 
@@ -78,7 +83,7 @@ export function ShareModal({ isOpen, onClose, title, text, source }: ShareModalP
           className="w-full py-2.5 bg-[#0F4C3A] hover:bg-[#0a382b] text-white rounded-xl font-medium text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors"
         >
           {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
-          <span>{copied ? 'تم نسخ النص المنسق!' : 'نسخ النص للحافظة'}</span>
+          <span>{copied ? (isAr ? 'تم نسخ النص المنسق!' : 'Text Copied!') : (isAr ? 'نسخ النص للحافظة' : 'Copy Text')}</span>
         </button>
       </div>
     </div>

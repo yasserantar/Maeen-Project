@@ -5,6 +5,7 @@ import { Search, X, BookOpen, Scroll } from 'lucide-react';
 import Link from 'next/link';
 import { SURAH_NAMES } from '@/lib/quran-api';
 import { VERIFIED_HADITHS } from '@/lib/hadith-api';
+import { useUserStore } from '@/lib/store';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ interface SearchModalProps {
 
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('');
+  const { progress } = useUserStore();
+  const isAr = progress.language === 'ar';
 
   if (!isOpen) return null;
 
@@ -39,7 +42,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="ابحث في السور، الآيات، الأحاديث، أو الموضعات..."
+            placeholder={isAr ? 'ابحث في السور، الآيات، الأحاديث، أو الموضوعات...' : 'Search surahs, verses, hadiths, or topics...'}
             className="flex-1 bg-transparent border-none outline-none text-base text-gray-900 dark:text-gray-100 placeholder-gray-400"
             autoFocus
           />
@@ -52,7 +55,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
         <div className="max-h-96 overflow-y-auto custom-scrollbar space-y-4 pt-2">
           {query.trim() === '' ? (
             <div className="text-center py-8 text-sm text-gray-400">
-              اكتب كلمة للبحث في القرآن الكريم والتفسير المعتمد والأحاديث الصحيحة...
+              {isAr ? 'اكتب كلمة للبحث في القرآن الكريم والتفسير المعتمد والأحاديث الصحيحة...' : 'Type a word to search Quran, verified Tafsir, and authentic Hadiths...'}
             </div>
           ) : (
             <>
@@ -61,7 +64,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 <div className="space-y-2">
                   <div className="text-xs font-bold text-[#0F4C3A] dark:text-[#C9A227] flex items-center gap-1.5">
                     <BookOpen className="w-4 h-4" />
-                    <span>سور القرآن الكريم</span>
+                    <span>{isAr ? 'سور القرآن الكريم' : 'Surahs of the Holy Quran'}</span>
                   </div>
                   <div className="grid grid-cols-1 gap-1">
                     {surahResults.map(([id, info]) => (
@@ -71,8 +74,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         onClick={onClose}
                         className="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center justify-between transition-colors"
                       >
-                        <span className="font-semibold text-sm">سورة {info.ar}</span>
-                        <span className="text-xs text-gray-400">{info.en}</span>
+                        <span className="font-semibold text-sm">{isAr ? `سورة ${info.ar}` : `Surah ${info.en}`}</span>
+                        <span className="text-xs text-gray-400">{isAr ? info.en : info.ar}</span>
                       </Link>
                     ))}
                   </div>
@@ -84,7 +87,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 <div className="space-y-2 pt-2">
                   <div className="text-xs font-bold text-[#0F4C3A] dark:text-[#C9A227] flex items-center gap-1.5">
                     <Scroll className="w-4 h-4" />
-                    <span>الأحاديث النبوية الصحيحة</span>
+                    <span>{isAr ? 'الأحاديث النبوية الصحيحة' : 'Authentic Hadiths'}</span>
                   </div>
                   <div className="grid grid-cols-1 gap-2">
                     {hadithResults.map((h) => (
@@ -95,10 +98,12 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                         className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 block space-y-1 transition-colors"
                       >
                         <div className="flex items-center justify-between text-xs text-[#0F4C3A] dark:text-[#C9A227]">
-                          <span>{h.collection_ar} - حديث رقم {h.hadith_number}</span>
-                          <span className="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-md">{h.grading_ar}</span>
+                          <span>{isAr ? `${h.collection_ar} - حديث رقم ${h.hadith_number}` : `${h.collection} - Hadith #${h.hadith_number}`}</span>
+                          <span className="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-md">
+                            {isAr ? h.grading_ar : h.grading}
+                          </span>
                         </div>
-                        <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">{h.text_ar}</p>
+                        <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-2">{isAr ? h.text_ar : h.text_en}</p>
                       </Link>
                     ))}
                   </div>
@@ -107,7 +112,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
               {surahResults.length === 0 && hadithResults.length === 0 && (
                 <div className="text-center py-8 text-sm text-gray-400">
-                  لم يتم العثور على نتائج تطابق &ldquo;{query}&rdquo;. جرب البحث بكلمة أخرى.
+                  {isAr ? `لم يتم العثور على نتائج تطابق "${query}". جرب البحث بكلمة أخرى.` : `No results matching "${query}". Try another search term.`}
                 </div>
               )}
             </>

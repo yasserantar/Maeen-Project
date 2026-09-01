@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Hadith } from '@/lib/types';
-import { Bookmark, Share2, ExternalLink, Info, CheckCircle2 } from 'lucide-react';
+import { Bookmark, Share2, ExternalLink, Info, CheckCircle2, Globe } from 'lucide-react';
 import { useUserStore } from '@/lib/store';
 import { ShareModal } from './ShareModal';
 
@@ -14,6 +14,7 @@ export function HadithCard({ hadith }: HadithCardProps) {
   const { progress, toggleBookmark } = useUserStore();
   const isAr = progress.language === 'ar';
   const [showExplanation, setShowExplanation] = useState(false);
+  const [showEnglishTranslation, setShowEnglishTranslation] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
 
   const isBookmarked = progress.bookmarks.some(
@@ -40,7 +41,7 @@ export function HadithCard({ hadith }: HadithCardProps) {
           </span>
 
           <button
-            onClick={() => toggleBookmark('hadith', hadith.id, `حديث ${hadith.hadith_number} - ${hadith.collection_ar}`)}
+            onClick={() => toggleBookmark('hadith', hadith.id, isAr ? `حديث ${hadith.hadith_number} - ${hadith.collection_ar}` : `Hadith ${hadith.hadith_number} - ${hadith.collection}`)}
             className={`p-2 rounded-xl border transition-colors ${
               isBookmarked
                 ? 'bg-[#C9A227] text-white border-[#C9A227]'
@@ -71,39 +72,51 @@ export function HadithCard({ hadith }: HadithCardProps) {
         {hadith.text_ar}
       </div>
 
-      {/* Hadith Text English */}
-      <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-sans border-l-2 border-[#0F4C3A] dark:border-[#C9A227] pl-4 py-1 italic">
-        &ldquo;{hadith.text_en}&rdquo;
-      </div>
+      {/* Hadith Text English Translation (Only in English mode or if toggled) */}
+      {(!isAr || showEnglishTranslation) && (
+        <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-sans border-l-2 border-[#0F4C3A] dark:border-[#C9A227] pl-4 py-1 italic">
+          &ldquo;{hadith.text_en}&rdquo;
+        </div>
+      )}
 
-      {/* Explanation Toggle */}
-      <div className="pt-2">
+      {/* Explanation & Translation Toggles */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <button
           onClick={() => setShowExplanation(!showExplanation)}
           className="flex items-center gap-2 text-xs font-bold text-[#0F4C3A] dark:text-[#C9A227] hover:underline"
         >
           <Info className="w-4 h-4" />
-          <span>{showExplanation ? (isAr ? 'إخفاء الشرح والمفردات' : 'Hide Explanation') : (isAr ? 'عرض الشرح والمفردات' : 'View Explanation')}</span>
+          <span>{showExplanation ? (isAr ? 'إخفاء الشرح والفوائد' : 'Hide Explanation') : (isAr ? 'عرض الشرح والفوائد' : 'View Explanation')}</span>
         </button>
 
-        {showExplanation && (
-          <div className="mt-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-2">
-            <p className="font-bold text-[#0F4C3A] dark:text-[#C9A227]">{isAr ? 'الشرح والفوائد الحديثية:' : 'Explanation & Key Learnings:'}</p>
-            <p>{isAr ? hadith.explanation_ar : hadith.explanation_en}</p>
-          </div>
+        {isAr && (
+          <button
+            onClick={() => setShowEnglishTranslation(!showEnglishTranslation)}
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#0F4C3A] dark:hover:text-[#C9A227] font-medium"
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>{showEnglishTranslation ? 'إخفاء الترجمة الإنجليزية' : 'عرض الترجمة الإنجليزية'}</span>
+          </button>
         )}
       </div>
 
+      {showExplanation && (
+        <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed space-y-2">
+          <p className="font-bold text-[#0F4C3A] dark:text-[#C9A227]">{isAr ? 'الشرح والفوائد الحديثية:' : 'Explanation & Key Learnings:'}</p>
+          <p>{isAr ? hadith.explanation_ar : hadith.explanation_en}</p>
+        </div>
+      )}
+
       {/* Footer & Source Attribution */}
       <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t border-[var(--border-color)]">
-        <span>المصدر المعتمد: {hadith.collection_ar}</span>
+        <span>{isAr ? `المصدر المعتمد: ${hadith.collection_ar}` : `Verified Source: ${hadith.collection}`}</span>
         <a
           href={hadith.source_url}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1 text-[#0F4C3A] dark:text-[#C9A227] hover:underline font-medium"
         >
-          <span>التحقق على Sunnah.com</span>
+          <span>{isAr ? 'التحقق عبر Sunnah.com' : 'Verify on Sunnah.com'}</span>
           <ExternalLink className="w-3.5 h-3.5" />
         </a>
       </div>
@@ -111,9 +124,9 @@ export function HadithCard({ hadith }: HadithCardProps) {
       <ShareModal
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
-        title={`${hadith.collection_ar} - حديث رقم ${hadith.hadith_number}`}
-        text={hadith.text_ar}
-        source={`Sunnah.com (${hadith.collection_ar})`}
+        title={isAr ? `${hadith.collection_ar} - حديث رقم ${hadith.hadith_number}` : `${hadith.collection} - Hadith #${hadith.hadith_number}`}
+        text={isAr ? hadith.text_ar : hadith.text_en}
+        source={isAr ? `منصة السنة النبوية (${hadith.collection_ar})` : `Sunnah Platform (${hadith.collection})`}
       />
     </div>
   );

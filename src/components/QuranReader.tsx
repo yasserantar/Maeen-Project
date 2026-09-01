@@ -5,7 +5,7 @@ import { QuranPageData } from '@/lib/types';
 import { fetchQuranPage } from '@/lib/quran-api';
 import { AudioPlayer } from './AudioPlayer';
 import { ShareModal } from './ShareModal';
-import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers } from 'lucide-react';
+import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Globe } from 'lucide-react';
 import { useUserStore } from '@/lib/store';
 
 interface QuranReaderProps {
@@ -18,6 +18,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'quran' | 'tafsir' | 'benefits'>('quran');
   const [activeTafsirSource, setActiveTafsirSource] = useState<'sadi' | 'ibn_kathir'>('sadi');
+  const [showTranslation, setShowTranslation] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [selectedVerseText, setSelectedVerseText] = useState('');
 
@@ -59,10 +60,10 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
       <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-4 sm:p-6 shadow-xs flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <button
-            onClick={handlePrevPage}
-            disabled={currentPageNum <= 1}
+            onClick={isAr ? handlePrevPage : handleNextPage}
+            disabled={isAr ? currentPageNum <= 1 : currentPageNum >= 604}
             className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            title="الصفحة السابقة"
+            title={isAr ? 'الصفحة السابقة' : 'Previous Page'}
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -70,22 +71,22 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="font-bold text-lg text-[#0F4C3A] dark:text-[#C9A227]">
-                {pageData?.surah_name_ar || 'جاري التحميل...'}
+                {isAr ? (pageData?.surah_name_ar || 'جاري التحميل...') : (pageData?.surah_name_en || 'Loading...')}
               </span>
               <span className="text-xs bg-[#0F4C3A]/10 text-[#0F4C3A] dark:bg-[#C9A227]/20 dark:text-[#C9A227] px-2.5 py-0.5 rounded-full font-bold">
-                الجزء {pageData?.juz_number || 1}
+                {isAr ? `الجزء ${pageData?.juz_number || 1}` : `Juz ${pageData?.juz_number || 1}`}
               </span>
             </div>
             <span className="text-xs text-gray-500">
-              صفحة {currentPageNum} من 604
+              {isAr ? `صفحة ${currentPageNum} من 604` : `Page ${currentPageNum} of 604`}
             </span>
           </div>
 
           <button
-            onClick={handleNextPage}
-            disabled={currentPageNum >= 604}
+            onClick={isAr ? handleNextPage : handlePrevPage}
+            disabled={isAr ? currentPageNum >= 604 : currentPageNum <= 1}
             className="p-2 rounded-xl bg-gray-100 dark:bg-gray-800 disabled:opacity-30 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            title="الصفحة التالية"
+            title={isAr ? 'الصفحة التالية' : 'Next Page'}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -111,16 +112,21 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             }`}
           >
             <CheckCircle className="w-4 h-4" />
-            <span>{isCompleted ? 'أتممت القراءة' : 'تعليم كمقروءة'}</span>
+            <span>
+              {isCompleted
+                ? (isAr ? 'أتممت القراءة' : 'Completed')
+                : (isAr ? 'تعليم كمقروءة' : 'Mark as Read')}
+            </span>
           </button>
 
           <button
-            onClick={() => toggleBookmark('page', currentPageNum, `${pageData?.surah_name_ar || 'صفحة'} - صفحة ${currentPageNum}`)}
+            onClick={() => toggleBookmark('page', currentPageNum, isAr ? `${pageData?.surah_name_ar || 'صفحة'} - صفحة ${currentPageNum}` : `${pageData?.surah_name_en || 'Page'} - Page ${currentPageNum}`)}
             className={`p-2 rounded-xl border transition-colors ${
               isBookmarked
                 ? 'bg-[#C9A227] text-white border-[#C9A227]'
                 : 'border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
+            title={isAr ? 'حفظ الصفحة' : 'Bookmark Page'}
           >
             <Bookmark className="w-4 h-4 fill-current" />
           </button>
@@ -128,6 +134,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
           <button
             onClick={openShareForPage}
             className="p-2 rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            title={isAr ? 'مشاركة' : 'Share'}
           >
             <Share2 className="w-4 h-4" />
           </button>
@@ -135,42 +142,59 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
       </div>
 
       {/* Mode Tabs (Quran / Tafsir / Benefits) */}
-      <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-2 text-sm font-semibold">
-        <button
-          onClick={() => setActiveTab('quran')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
-            activeTab === 'quran'
-              ? 'bg-[#0F4C3A] text-white shadow-xs'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-          }`}
-        >
-          <BookOpen className="w-4 h-4" />
-          <span>آيات الصفحة</span>
-        </button>
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-color)] pb-2 text-sm font-semibold">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setActiveTab('quran')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
+              activeTab === 'quran'
+                ? 'bg-[#0F4C3A] text-white shadow-xs'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <BookOpen className="w-4 h-4" />
+            <span>{isAr ? 'آيات الصفحة' : 'Page Verses'}</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('tafsir')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
-            activeTab === 'tafsir'
-              ? 'bg-[#0F4C3A] text-white shadow-xs'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-          }`}
-        >
-          <FileText className="w-4 h-4" />
-          <span>التفسير المعتمد</span>
-        </button>
+          <button
+            onClick={() => setActiveTab('tafsir')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
+              activeTab === 'tafsir'
+                ? 'bg-[#0F4C3A] text-white shadow-xs'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>{isAr ? 'التفسير المعتمد' : 'Verified Tafsir'}</span>
+          </button>
 
-        <button
-          onClick={() => setActiveTab('benefits')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
-            activeTab === 'benefits'
-              ? 'bg-[#0F4C3A] text-white shadow-xs'
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-          }`}
-        >
-          <Sparkles className="w-4 h-4 text-amber-400" />
-          <span>الفوائد والتدبر</span>
-        </button>
+          <button
+            onClick={() => setActiveTab('benefits')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
+              activeTab === 'benefits'
+                ? 'bg-[#0F4C3A] text-white shadow-xs'
+                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-amber-400" />
+            <span>{isAr ? 'الفوائد والتدبر' : 'Benefits & Reflections'}</span>
+          </button>
+        </div>
+
+        {/* Optional Translation Toggle */}
+        {activeTab === 'quran' && (
+          <button
+            onClick={() => setShowTranslation(!showTranslation)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${
+              showTranslation
+                ? 'bg-[#C9A227] text-white border-[#C9A227]'
+                : 'border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>{isAr ? (showTranslation ? 'إخفاء الترجمة الإنجليزية' : 'عرض الترجمة الإنجليزية') : (showTranslation ? 'Hide English Translation' : 'Show English Translation')}</span>
+          </button>
+        )}
       </div>
 
       {/* Main Content Area */}
@@ -178,7 +202,9 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 space-y-3">
             <div className="w-10 h-10 border-4 border-[#0F4C3A] border-t-transparent rounded-full animate-spin"></div>
-            <span className="text-sm text-gray-500 font-medium">جاري تحميل آيات الصفحة المباركة...</span>
+            <span className="text-sm text-gray-500 font-medium">
+              {isAr ? 'جاري تحميل آيات الصفحة المباركة...' : 'Loading Quran verses...'}
+            </span>
           </div>
         ) : (
           <>
@@ -187,7 +213,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                 {/* Audio Recitation Player */}
                 <AudioPlayer
                   audioUrl={pageData.verses[0]?.audio_url}
-                  title={`تلاوة صفحة ${currentPageNum} - ${pageData.surah_name_ar}`}
+                  title={isAr ? `تلاوة صفحة ${currentPageNum} - ${pageData.surah_name_ar}` : `Recitation Page ${currentPageNum} - ${pageData.surah_name_en}`}
                 />
 
                 {/* Bismillah Header if start of surah */}
@@ -209,29 +235,31 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                   ))}
                 </div>
 
-                {/* Translation Box */}
-                <div className="pt-6 border-t border-[var(--border-color)] space-y-3">
-                  <h4 className="font-bold text-xs text-[#0F4C3A] dark:text-[#C9A227] uppercase tracking-wider">
-                    English Translation (Sahih International)
-                  </h4>
-                  <div className="space-y-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-sans leading-relaxed">
-                    {pageData.verses.map((v) => (
-                      <p key={v.id}>
-                        <span className="font-bold text-[#0F4C3A] dark:text-[#C9A227] mr-1">[{v.verse_key}]</span>
-                        {v.translations?.[0]?.text || ''}
-                      </p>
-                    ))}
+                {/* Translation Box (Only if enabled or in English mode) */}
+                {(showTranslation || !isAr) && (
+                  <div className="pt-6 border-t border-[var(--border-color)] space-y-3">
+                    <h4 className="font-bold text-xs text-[#0F4C3A] dark:text-[#C9A227] uppercase tracking-wider">
+                      English Translation (Sahih International)
+                    </h4>
+                    <div className="space-y-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-sans leading-relaxed">
+                      {pageData.verses.map((v) => (
+                        <p key={v.id}>
+                          <span className="font-bold text-[#0F4C3A] dark:text-[#C9A227] mr-1">[{v.verse_key}]</span>
+                          {v.translations?.[0]?.text || ''}
+                        </p>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
             {activeTab === 'tafsir' && pageData && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+                <div className="flex flex-wrap items-center justify-between border-b border-[var(--border-color)] pb-3 gap-2">
                   <div className="flex items-center gap-2">
                     <Layers className="w-5 h-5 text-[#0F4C3A] dark:text-[#C9A227]" />
-                    <h3 className="font-bold text-lg">اختر التفسير المعتمد</h3>
+                    <h3 className="font-bold text-lg">{isAr ? 'اختر التفسير المعتمد' : 'Select Verified Tafsir'}</h3>
                   </div>
 
                   <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-xl text-xs font-bold">
@@ -241,7 +269,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                         activeTafsirSource === 'sadi' ? 'bg-[#0F4C3A] text-white' : 'text-gray-600 dark:text-gray-400'
                       }`}
                     >
-                      تفسير السعدي (تيسير الكريم الرحمن)
+                      {isAr ? 'تفسير السعدي (تيسير الكريم الرحمن)' : 'Tafsir As-Sa\'di'}
                     </button>
                     <button
                       onClick={() => setActiveTafsirSource('ibn_kathir')}
@@ -249,14 +277,16 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
                         activeTafsirSource === 'ibn_kathir' ? 'bg-[#0F4C3A] text-white' : 'text-gray-600 dark:text-gray-400'
                       }`}
                     >
-                      تفسير ابن كثير (تفسير القرآن العظيم)
+                      {isAr ? 'تفسير ابن كثير (تفسير القرآن العظيم)' : 'Tafsir Ibn Kathir'}
                     </button>
                   </div>
                 </div>
 
                 <div className="p-6 rounded-xl bg-[#F8F6F1] dark:bg-[#0B1210] border border-[#C9A227]/30 leading-relaxed text-sm sm:text-base text-gray-800 dark:text-gray-200 space-y-4">
                   <div className="text-xs font-bold text-[#0F4C3A] dark:text-[#C9A227] pb-2 border-b border-gray-200 dark:border-gray-800">
-                    {activeTafsirSource === 'sadi' ? 'المصدر: تفسير الشيخ عبد الرحمن بن ناصر السعدي رحمه الله' : 'المصدر: تفسير الحافظ ابن كثير رحمه الله'}
+                    {activeTafsirSource === 'sadi'
+                      ? (isAr ? 'المصدر: تفسير الشيخ عبد الرحمن بن ناصر السعدي رحمه الله' : 'Source: Tafsir Shaykh Abd ar-Rahman as-Sa\'di')
+                      : (isAr ? 'المصدر: تفسير الحافظ ابن كثير رحمه الله' : 'Source: Tafsir Hafiz Ibn Kathir')}
                   </div>
                   <p className="leading-loose">
                     {activeTafsirSource === 'sadi' ? pageData.tafsir_sadi : pageData.tafsir_ibn_kathir}
@@ -269,11 +299,11 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
               <div className="space-y-6">
                 <div className="flex items-center gap-2 text-[#0F4C3A] dark:text-[#C9A227] font-bold text-lg border-b border-[var(--border-color)] pb-3">
                   <Sparkles className="w-5 h-5 fill-amber-400 text-amber-400" />
-                  <h3>فوائد وتدبر صفحة اليوم</h3>
+                  <h3>{isAr ? 'فوائد وتدبر صفحة اليوم' : 'Key Learnings & Reflection'}</h3>
                 </div>
 
                 <ul className="space-y-3">
-                  {pageData.benefits_ar?.map((b, idx) => (
+                  {(isAr ? pageData.benefits_ar : pageData.benefits_en)?.map((b, idx) => (
                     <li key={idx} className="flex items-start gap-3 p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900 text-sm text-gray-800 dark:text-gray-200">
                       <span className="w-6 h-6 rounded-full bg-[#0F4C3A] text-white flex items-center justify-center text-xs font-bold shrink-0">
                         {idx + 1}
@@ -291,9 +321,9 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
       <ShareModal
         isOpen={isShareOpen}
         onClose={() => setIsShareOpen(false)}
-        title={`${pageData?.surah_name_ar || 'قرآن كريم'} - صفحة ${currentPageNum}`}
+        title={isAr ? `${pageData?.surah_name_ar || 'قرآن كريم'} - صفحة ${currentPageNum}` : `${pageData?.surah_name_en || 'Holy Quran'} - Page ${currentPageNum}`}
         text={selectedVerseText}
-        source={`مصدر القرآن الكريم (مصحف المدينة النبوية - صفحة ${currentPageNum})`}
+        source={isAr ? `مصدر القرآن الكريم (مصحف المدينة النبوية - صفحة ${currentPageNum})` : `Quran Source (Medina Mushaf - Page ${currentPageNum})`}
       />
     </div>
   );

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Scroll, Compass, ShieldCheck, ArrowLeft, ArrowRight, Sparkles, CheckCircle2, Bell } from 'lucide-react';
+import { BookOpen, Scroll, Compass, ShieldCheck, ArrowLeft, ArrowRight, Sparkles, Bell } from 'lucide-react';
 import { fetchQuranPage } from '@/lib/quran-api';
 import { fetchDailyHadith } from '@/lib/hadith-api';
 import { QuranPageData, Hadith } from '@/lib/types';
@@ -19,7 +19,6 @@ export default function HomePage() {
   const isAr = progress.language === 'ar';
 
   useEffect(() => {
-    // Fetch today's page (page 1 default or based on day of year)
     const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
     const todayPage = (dayOfYear % 604) + 1;
 
@@ -47,7 +46,11 @@ export default function HomePage() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight">
-            مَعِين | <span className="text-[#C9A227]">Maeen</span>
+            {isAr ? (
+              <>مَعِين <span className="text-[#C9A227]">اليومي</span></>
+            ) : (
+              <>Maeen <span className="text-[#C9A227]">Platform</span></>
+            )}
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-200 font-medium leading-relaxed">
@@ -120,7 +123,7 @@ export default function HomePage() {
           </h3>
           <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
             {isAr
-              ? 'تجربة قراءة ناصعة خالية تماماً من الإعلانات أو التتبع، مع دعم العمل بدون إنترنت (PWA Offline).'
+              ? 'تجربة قراءة ناصعة خالية تماماً من الإعلانات أو التتبع، مع دعم العمل بدون إنترنت.'
               : 'A clean, quiet reading experience completely free from advertisements, tracking, or distractions.'}
           </p>
         </div>
@@ -138,15 +141,17 @@ export default function HomePage() {
               </div>
 
               <span className="text-xs bg-[#0F4C3A]/10 text-[#0F4C3A] dark:bg-[#C9A227]/20 dark:text-[#C9A227] px-3 py-1 rounded-full font-bold">
-                {quranData ? `صفحة ${quranData.page_number}` : 'جاري التحميل...'}
+                {quranData ? (isAr ? `صفحة ${quranData.page_number}` : `Page ${quranData.page_number}`) : (isAr ? 'جاري التحميل...' : 'Loading...')}
               </span>
             </div>
 
             {quranData && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span className="font-bold text-[#0F4C3A] dark:text-[#C9A227]">{quranData.surah_name_ar}</span>
-                  <span>الجزء {quranData.juz_number}</span>
+                  <span className="font-bold text-[#0F4C3A] dark:text-[#C9A227]">
+                    {isAr ? quranData.surah_name_ar : quranData.surah_name_en}
+                  </span>
+                  <span>{isAr ? `الجزء ${quranData.juz_number}` : `Juz ${quranData.juz_number}`}</span>
                 </div>
 
                 <div className="quran-font text-xl leading-loose text-right p-4 rounded-xl bg-[#F8F6F1]/60 dark:bg-[#0B1210]/60 border border-[#C9A227]/20 line-clamp-4">
@@ -154,7 +159,9 @@ export default function HomePage() {
                 </div>
 
                 <div className="p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900 text-xs text-gray-700 dark:text-gray-300 space-y-1">
-                  <span className="font-bold text-[#0F4C3A] dark:text-[#C9A227] block">تفسير السعدي لمطلع الصفحة:</span>
+                  <span className="font-bold text-[#0F4C3A] dark:text-[#C9A227] block">
+                    {isAr ? 'تفسير السعدي لمطلع الصفحة:' : 'Tafsir As-Sa\'di:'}
+                  </span>
                   <p className="line-clamp-2">{quranData.tafsir_sadi}</p>
                 </div>
               </div>
@@ -187,11 +194,11 @@ export default function HomePage() {
           <Bell className="w-6 h-6" />
         </div>
         <h3 className="text-2xl font-bold text-[#0F4C3A] dark:text-[#C9A227]">
-          {isAr ? 'احصل على تذكير القرآن والحديث اليومي' : 'Subscribe to Daily Quran & Hadith Reminders'}
+          {isAr ? 'احصل على تذكير القرآن والحديث اليومي' : 'Subscribe to Daily Reminders'}
         </h3>
         <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 max-w-md mx-auto">
           {isAr
-            ? 'احرص على ألا يفوتك وردك اليومي من القرآن الكريم والحديث النبوي الشريف عبر التنبيهات الفورية.'
+            ? 'احرص على ألا يفوتك وردك اليومي من القرآن الكريم والحديث النبوي الشريف.'
             : 'Stay connected with your daily Quran page and authentic Hadith.'}
         </p>
 

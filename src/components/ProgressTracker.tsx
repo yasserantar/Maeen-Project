@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 
 export function ProgressTracker() {
   const { progress, togglePageCompletion, saveNote } = useUserStore();
+  const isAr = progress.language === 'ar';
   const [selectedPage, setSelectedPage] = useState<number>(1);
   const [noteText, setNoteText] = useState<string>(progress.notes[1] || '');
   const [savedNoteSuccess, setSavedNoteSuccess] = useState(false);
@@ -41,10 +42,10 @@ export function ProgressTracker() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-[#C9A227] font-bold text-sm uppercase tracking-wider">
               <Compass className="w-5 h-5" />
-              <span>مختصر ختمة القرآن الكريم</span>
+              <span>{isAr ? 'مختصر ختمة القرآن الكريم' : 'Quran Completion Summary'}</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold">
-              ختمت {completedCount} صفحة من أصل 604 صفحة
+              {isAr ? `ختمت ${completedCount} صفحة من أصل 604 صفحة` : `Completed ${completedCount} of 604 pages`}
             </h2>
           </div>
 
@@ -52,7 +53,7 @@ export function ProgressTracker() {
             <Award className="w-8 h-8 text-[#C9A227]" />
             <div className="flex flex-col">
               <span className="text-2xl font-bold text-[#C9A227]">{percentage}%</span>
-              <span className="text-xs text-gray-200">نسبة الإنجاز الكلية</span>
+              <span className="text-xs text-gray-200">{isAr ? 'نسبة الإنجاز الكلية' : 'Total Completion'}</span>
             </div>
           </div>
         </div>
@@ -66,20 +67,22 @@ export function ProgressTracker() {
             />
           </div>
           <div className="flex justify-between text-xs text-gray-200 font-medium">
-            <span>المتبقي: {604 - completedCount} صفحة</span>
-            <span>الهدف: ختم المصحف كاملاً (604 صفحة)</span>
+            <span>{isAr ? `المتبقي: ${604 - completedCount} صفحة` : `Remaining: ${604 - completedCount} pages`}</span>
+            <span>{isAr ? 'الهدف: ختم المصحف كاملاً (604 صفحة)' : 'Goal: Complete all 604 Quran pages'}</span>
           </div>
         </div>
       </div>
 
       {/* Grid of 604 Pages */}
       <div className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-2xl p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
+        <div className="flex flex-wrap items-center justify-between border-b border-[var(--border-color)] pb-3 gap-2">
           <h3 className="font-bold text-lg text-[#0F4C3A] dark:text-[#C9A227] flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5" />
-            <span>شبكة متابعة الـ 604 صفحة</span>
+            <span>{isAr ? 'شبكة متابعة الـ 604 صفحة' : '604 Pages Progress Grid'}</span>
           </h3>
-          <span className="text-xs text-gray-500">انقر على الصفحات لتعديل حالة القراءة أو كتابة ملاحظة</span>
+          <span className="text-xs text-gray-500">
+            {isAr ? 'انقر على الصفحات لتعديل حالة القراءة أو كتابة ملاحظة' : 'Click any page square to toggle status or add reflection notes'}
+          </span>
         </div>
 
         <div className="grid grid-cols-8 sm:grid-cols-12 md:grid-cols-16 gap-1.5 max-h-72 overflow-y-auto custom-scrollbar p-1">
@@ -100,7 +103,7 @@ export function ProgressTracker() {
                     ? 'bg-emerald-600 text-white shadow-2xs'
                     : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
-                title={`صفحة ${page} ${isDone ? '(مكتملة)' : ''}`}
+                title={isAr ? `صفحة ${page} ${isDone ? '(مكتملة)' : ''}` : `Page ${page} ${isDone ? '(Completed)' : ''}`}
               >
                 {page}
               </button>
@@ -114,7 +117,7 @@ export function ProgressTracker() {
         <div className="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
           <div className="flex items-center gap-2 text-[#0F4C3A] dark:text-[#C9A227] font-bold">
             <FileEdit className="w-5 h-5" />
-            <h3>ملاحظات وتدبر صفحة {selectedPage}</h3>
+            <h3>{isAr ? `ملاحظات وتدبر صفحة ${selectedPage}` : `Reflection Notes - Page ${selectedPage}`}</h3>
           </div>
 
           <button
@@ -130,14 +133,16 @@ export function ProgressTracker() {
                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
             }`}
           >
-            {progress.completedPages.includes(selectedPage) ? 'صفحة مكتملة ✓' : 'تحديد كمكتملة'}
+            {progress.completedPages.includes(selectedPage)
+              ? (isAr ? 'صفحة مكتملة ✓' : 'Page Completed ✓')
+              : (isAr ? 'تحديد كمكتملة' : 'Mark as Completed')}
           </button>
         </div>
 
         <textarea
           value={noteText}
           onChange={(e) => setNoteText(e.target.value)}
-          placeholder={`اكتب تدبراتك الخاصة أو الفوائد التي استنبطتها عند قراءة الصفحة ${selectedPage}...`}
+          placeholder={isAr ? `اكتب تدبراتك الخاصة أو الفوائد التي استنبطتها عند قراءة الصفحة ${selectedPage}...` : `Write your personal reflections or key takeaways for page ${selectedPage}...`}
           rows={4}
           className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 outline-none text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:border-[#0F4C3A] dark:focus:border-[#C9A227]"
         />
@@ -147,7 +152,7 @@ export function ProgressTracker() {
           className="py-2.5 px-6 bg-[#0F4C3A] hover:bg-[#0a382b] text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 transition-colors shadow-xs"
         >
           {savedNoteSuccess ? <Check className="w-4 h-4 text-emerald-300" /> : null}
-          <span>{savedNoteSuccess ? 'تم حفظ الملاحظة!' : 'حفظ الملاحظة'}</span>
+          <span>{savedNoteSuccess ? (isAr ? 'تم حفظ الملاحظة!' : 'Note Saved!') : (isAr ? 'حفظ الملاحظة' : 'Save Note')}</span>
         </button>
       </div>
     </div>

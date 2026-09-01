@@ -20,7 +20,7 @@ export function Footer() {
                 م
               </div>
               <span className="font-bold text-xl text-[#0F4C3A] dark:text-[#C9A227]">
-                {isAr ? 'مَعِين | Maeen' : 'Maeen'}
+                {isAr ? 'مَعِين' : 'Maeen'}
               </span>
             </div>
             <p className="text-gray-600 dark:text-gray-400 max-w-md leading-relaxed text-xs sm:text-sm">
@@ -58,7 +58,7 @@ export function Footer() {
               <li>
                 <a href="/llms.txt" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 hover:text-[#C9A227]">
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <span>llms.txt (AI Discoverability)</span>
+                  <span>{isAr ? 'ملف llms.txt (الذكاء الاصطناعي)' : 'llms.txt (AI Discoverability)'}</span>
                 </a>
               </li>
             </ul>
@@ -66,7 +66,7 @@ export function Footer() {
         </div>
 
         <div className="mt-8 pt-6 border-t border-[var(--border-color)] flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
-          <p>© {new Date().getFullYear()} مَعِين - جميع الحقوق محفوظة للمسلمين.</p>
+          <p>{isAr ? `© ${new Date().getFullYear()} مَعِين - جميع الحقوق محفوظة.` : `© ${new Date().getFullYear()} Maeen Platform - All Rights Reserved.`}</p>
           <div className="flex items-center gap-1">
             <span>{isAr ? 'صُنع بحب لخدمة كتاب الله وسنة نبينا ﷺ' : 'Crafted with devotion for Quran & Sunnah'}</span>
             <Heart className="w-3.5 h-3.5 text-red-500 inline fill-red-500" />

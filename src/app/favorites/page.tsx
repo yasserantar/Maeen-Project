@@ -51,7 +51,7 @@ export default function FavoritesPage() {
                 <div>
                   <h4 className="font-bold text-sm text-gray-900 dark:text-gray-100">{b.title}</h4>
                   <span className="text-[10px] text-gray-400">
-                    تاريخ الحفظ: {new Date(b.date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US')}
+                    {isAr ? `تاريخ الحفظ: ${new Date(b.date).toLocaleDateString('ar-EG')}` : `Saved on: ${new Date(b.date).toLocaleDateString('en-US')}`}
                   </span>
                 </div>
               </div>
@@ -61,12 +61,12 @@ export default function FavoritesPage() {
                   href={b.type === 'page' ? `/quran` : `/hadith`}
                   className="px-3 py-1.5 rounded-lg bg-[#0F4C3A] text-white text-xs font-bold hover:bg-[#0a382b] transition-colors"
                 >
-                  الانتقال
+                  {isAr ? 'الانتقال' : 'Open'}
                 </Link>
                 <button
                   onClick={() => toggleBookmark(b.type, b.id, b.title)}
                   className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
-                  title="حذف من المفضلة"
+                  title={isAr ? 'حذف من المفضلة' : 'Remove'}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
