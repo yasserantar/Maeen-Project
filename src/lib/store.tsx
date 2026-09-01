@@ -1,9 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { UserProgress, Language, NotificationSettings } from './types';
+import { UserProgress, Language, NotificationSettings, UserProfile } from './types';
 
-const STORAGE_KEY = 'maeen_user_progress_v5';
+const STORAGE_KEY = 'maeen_user_progress_v6';
 
 const defaultNotifications: NotificationSettings = {
   browserEnabled: false,
@@ -13,6 +13,7 @@ const defaultNotifications: NotificationSettings = {
 };
 
 const defaultState: UserProgress = {
+  user: null,
   completedPages: [],
   currentPage: 1,
   bookmarks: [
@@ -34,6 +35,8 @@ interface UserStoreContextType {
   saveNote: (pageNumber: number, note: string) => void;
   updateNotifications: (settings: Partial<NotificationSettings>) => void;
   saveProgress: (newProgress: UserProgress) => void;
+  loginUser: (user: UserProfile) => void;
+  logoutUser: () => void;
 }
 
 const UserStoreContext = createContext<UserStoreContextType | null>(null);
@@ -58,6 +61,7 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
         const merged: UserProgress = {
           ...defaultState,
           ...parsed,
+          user: parsed.user || null,
           notifications: {
             ...defaultNotifications,
             ...(parsed.notifications || {})
@@ -74,6 +78,16 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
     setIsLoaded(true);
   }, []);
 
+  const syncToCloud = useCallback((updated: UserProgress) => {
+    if (updated.user) {
+      fetch('/api/user/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: updated.user.id, progress: updated })
+      }).catch(err => console.warn('Cloud sync error', err));
+    }
+  }, []);
+
   const saveProgress = useCallback((newProgress: UserProgress) => {
     setProgress(newProgress);
     try {
@@ -81,7 +95,8 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.warn('LocalStorage save error', e);
     }
-  }, []);
+    syncToCloud(newProgress);
+  }, [syncToCloud]);
 
   const togglePageCompletion = useCallback((pageNumber: number) => {
     setProgress((prev) => {
@@ -96,9 +111,10 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.warn(e);
       }
+      syncToCloud(updated);
       return updated;
     });
-  }, []);
+  }, [syncToCloud]);
 
   const setLanguage = useCallback((lang: Language) => {
     setProgress((prev) => {
@@ -139,9 +155,10 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.warn(e);
       }
+      syncToCloud(updated);
       return updated;
     });
-  }, []);
+  }, [syncToCloud]);
 
   const saveNote = useCallback((pageNumber: number, note: string) => {
     setProgress((prev) => {
@@ -157,9 +174,10 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.warn(e);
       }
+      syncToCloud(updated);
       return updated;
     });
-  }, []);
+  }, [syncToCloud]);
 
   const updateNotifications = useCallback((settings: Partial<NotificationSettings>) => {
     setProgress((prev) => {
@@ -170,6 +188,32 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
           ...settings
         }
       };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.warn(e);
+      }
+      syncToCloud(updated);
+      return updated;
+    });
+  }, [syncToCloud]);
+
+  const loginUser = useCallback((user: UserProfile) => {
+    setProgress((prev) => {
+      const updated = { ...prev, user };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {
+        console.warn(e);
+      }
+      syncToCloud(updated);
+      return updated;
+    });
+  }, [syncToCloud]);
+
+  const logoutUser = useCallback(() => {
+    setProgress((prev) => {
+      const updated = { ...prev, user: null };
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       } catch (e) {
@@ -190,7 +234,9 @@ export function UserStoreProvider({ children }: { children: React.ReactNode }) {
         toggleBookmark,
         saveNote,
         updateNotifications,
-        saveProgress
+        saveProgress,
+        loginUser,
+        logoutUser
       }}
     >
       {children}
@@ -210,7 +256,9 @@ export function useUserStore() {
       toggleBookmark: () => {},
       saveNote: () => {},
       updateNotifications: () => {},
-      saveProgress: () => {}
+      saveProgress: () => {},
+      loginUser: () => {},
+      logoutUser: () => {}
     };
   }
   return context;

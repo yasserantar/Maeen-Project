@@ -70,7 +70,19 @@ export interface NotificationSettings {
   emailEnabled: boolean;
 }
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  createdAt: string;
+  streak: number;
+  lastActive: string;
+  isCloudSynced: boolean;
+}
+
 export interface UserProgress {
+  user: UserProfile | null;
   completedPages: number[];
   currentPage: number;
   bookmarks: Array<{
