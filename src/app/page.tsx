@@ -2,12 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { BookOpen, Scroll, Compass, ShieldCheck, ArrowLeft, ArrowRight, Sparkles, Bell, Star, ChevronLeft, ChevronRight, Languages } from 'lucide-react';
+import { BookOpen, Scroll, Compass, ShieldCheck, ArrowLeft, ArrowRight, Sparkles, Bell, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { fetchQuranPage } from '@/lib/quran-api';
 import { fetchDailyHadith } from '@/lib/hadith-api';
 import { QuranPageData, Hadith } from '@/lib/types';
 import { HadithCard } from '@/components/HadithCard';
+import { DailyQuizCard } from '@/components/DailyQuizCard';
 import { NotificationSettingsModal } from '@/components/NotificationSettingsModal';
 import { useUserStore } from '@/lib/store';
 
@@ -15,7 +16,6 @@ export default function HomePage() {
   const [quranData, setQuranData] = useState<QuranPageData | null>(null);
   const [hadithData, setHadithData] = useState<Hadith | null>(null);
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
-  const [previewMode, setPreviewMode] = useState<'bilingual' | 'english' | 'arabic'>('bilingual');
 
   const { progress } = useUserStore();
   const isAr = progress.language === 'ar';
@@ -304,6 +304,9 @@ export default function HomePage() {
           </div>
         </motion.div>
       </div>
+
+      {/* Daily Tadabbur & Vocab Quiz Section */}
+      <DailyQuizCard />
 
       {/* Today's Authentic Hadith Section */}
       <motion.section

@@ -5,7 +5,8 @@ import { QuranPageData } from '@/lib/types';
 import { fetchQuranPage } from '@/lib/quran-api';
 import { AudioPlayer } from './AudioPlayer';
 import { ShareModal } from './ShareModal';
-import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Compass, AlertCircle, Copy, Check, ZoomIn, ZoomOut } from 'lucide-react';
+import { Bookmark, Share2, CheckCircle, BookOpen, ChevronRight, ChevronLeft, Sparkles, FileText, Layers, Compass, AlertCircle, Copy, Check, Maximize2, Minimize2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useUserStore } from '@/lib/store';
 
 interface QuranReaderProps {
@@ -28,6 +29,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
   const [activeVerseIndex, setActiveVerseIndex] = useState<number | null>(null);
   const [fontSizeIndex, setFontSizeIndex] = useState(1); // M (Default)
   const [copiedAyahKey, setCopiedAyahKey] = useState<string | null>(null);
+  const [isZenMode, setIsZenMode] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [selectedVerseText, setSelectedVerseText] = useState('');
 
@@ -64,11 +66,13 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
     if (currentPageNum > 1) setCurrentPageNum(prev => prev - 1);
   }, [currentPageNum]);
 
-  // Keyboard navigation for page turning
+  // Keyboard navigation for page turning & ESC for Zen mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) return;
-      if (e.key === 'ArrowRight') {
+      if (e.key === 'Escape' && isZenMode) {
+        setIsZenMode(false);
+      } else if (e.key === 'ArrowRight') {
         if (isAr) handlePrevPage();
         else handleNextPage();
       } else if (e.key === 'ArrowLeft') {
@@ -78,7 +82,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isAr, handleNextPage, handlePrevPage]);
+  }, [isAr, isZenMode, handleNextPage, handlePrevPage]);
 
   const handleCopyVerse = (verseKey: string, arabicText: string, translation?: string) => {
     const textToCopy = isAr
@@ -98,7 +102,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${isZenMode ? 'fixed inset-0 z-50 overflow-y-auto bg-[var(--bg-light)] p-4 sm:p-8' : ''}`}>
       {/* Top Page Header Bar */}
       <div className="glass-panel rounded-3xl p-4 sm:p-6 shadow-sm flex flex-wrap items-center justify-between gap-4 border border-[var(--border-color)]">
         <div className="flex items-center gap-3">
@@ -163,6 +167,18 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
           </button>
 
           <button
+            onClick={() => setIsZenMode(!isZenMode)}
+            className={`p-2 rounded-xl border transition-colors ${
+              isZenMode
+                ? 'bg-[#F0CA50] text-[#0A261E] border-[#F0CA50]'
+                : 'border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-[#1C2E27]'
+            }`}
+            title={isZenMode ? (isAr ? 'إنهاء وضع القراءة الكامل (ESC)' : 'Exit Zen Mode (ESC)') : (isAr ? 'وضع القراءة الهادئة بملء الشاشة' : 'Zen Fullscreen Focus Mode')}
+          >
+            {isZenMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+
+          <button
             onClick={() => toggleBookmark('page', currentPageNum, isAr ? `${pageData?.surah_name_ar || 'صفحة'} - صفحة ${currentPageNum}` : `${pageData?.surah_name_en || 'Page'} - Page ${currentPageNum}`)}
             className={`p-2 rounded-xl border transition-colors ${
               isBookmarked
@@ -177,7 +193,7 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
           <button
             onClick={openShareForPage}
             className="p-2 rounded-xl border border-gray-200 dark:border-white/10 hover:bg-gray-100 dark:hover:bg-[#1C2E27] transition-colors"
-            title={isAr ? 'مشاركة' : 'Share'}
+            title={isAr ? 'مشاركة كصورة' : 'Share Card'}
           >
             <Share2 className="w-4 h-4" />
           </button>
