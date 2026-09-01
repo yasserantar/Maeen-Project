@@ -107,37 +107,39 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
     <div className={`space-y-6 ${isZenMode ? 'fixed inset-0 z-50 overflow-y-auto bg-[var(--bg-light)] p-4 sm:p-8' : ''}`}>
       {/* Top Page Header Bar */}
       <div className="glass-panel rounded-3xl p-4 sm:p-6 shadow-sm flex flex-wrap items-center justify-between gap-4 border border-[var(--border-color)]">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
-            onClick={isAr ? handlePrevPage : handleNextPage}
-            disabled={isAr ? currentPageNum <= 1 : currentPageNum >= 604}
-            className="p-2.5 rounded-2xl bg-white dark:bg-[#131F1A] disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-[#1C2E27] transition-all shadow-2xs border border-gray-200/60 dark:border-white/10"
-            title={isAr ? 'الصفحة السابقة (سهم يمين)' : 'Previous Page (Right Arrow)'}
+            onClick={handlePrevPage}
+            disabled={currentPageNum <= 1}
+            className="px-3 py-2 rounded-2xl bg-white dark:bg-[#131F1A] disabled:opacity-25 hover:bg-gray-100 dark:hover:bg-[#1C2E27] text-gray-700 dark:text-gray-200 text-xs font-bold transition-all shadow-2xs border border-gray-200/60 dark:border-white/10 flex items-center gap-1.5"
+            title={isAr ? 'الصفحة السابقة' : 'Previous Page'}
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+            <span className="hidden md:inline">{isAr ? 'السابقة' : 'Prev'}</span>
           </button>
           
-          <div className="flex flex-col">
+          <div className="flex flex-col text-center sm:text-start px-1">
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-xl text-[#0A382C] dark:text-[#F0CA50]">
+              <span className="font-extrabold text-lg sm:text-xl text-[#0A382C] dark:text-[#F0CA50]">
                 {isAr ? (pageData?.surah_name_ar || 'جاري التحميل...') : (pageData?.surah_name_en || 'Loading...')}
               </span>
-              <span className="text-xs bg-[#0A382C]/10 text-[#0A382C] dark:bg-[#F0CA50]/20 dark:text-[#F0CA50] px-3 py-1 rounded-full font-bold border border-transparent dark:border-[#F0CA50]/30">
+              <span className="text-[11px] bg-[#0A382C]/10 text-[#0A382C] dark:bg-[#F0CA50]/20 dark:text-[#F0CA50] px-2.5 py-0.5 rounded-full font-bold border border-transparent dark:border-[#F0CA50]/30">
                 {isAr ? `الجزء ${pageData?.juz_number || 1}` : `Juz ${pageData?.juz_number || 1}`}
               </span>
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
               {isAr ? `صفحة ${currentPageNum} من 604` : `Page ${currentPageNum} of 604`}
             </span>
           </div>
 
           <button
-            onClick={isAr ? handleNextPage : handlePrevPage}
-            disabled={isAr ? currentPageNum >= 604 : currentPageNum <= 1}
-            className="p-2.5 rounded-2xl bg-white dark:bg-[#131F1A] disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-[#1C2E27] transition-all shadow-2xs border border-gray-200/60 dark:border-white/10"
-            title={isAr ? 'الصفحة التالية (سهم يسار)' : 'Next Page (Left Arrow)'}
+            onClick={handleNextPage}
+            disabled={currentPageNum >= 604}
+            className="px-3 py-2 rounded-2xl bg-white dark:bg-[#131F1A] disabled:opacity-25 hover:bg-gray-100 dark:hover:bg-[#1C2E27] text-gray-700 dark:text-gray-200 text-xs font-bold transition-all shadow-2xs border border-gray-200/60 dark:border-white/10 flex items-center gap-1.5"
+            title={isAr ? 'الصفحة التالية' : 'Next Page'}
           >
-            <ChevronLeft className="w-5 h-5" />
+            <span className="hidden md:inline">{isAr ? 'التالية' : 'Next'}</span>
+            <ChevronLeft className="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
           </button>
         </div>
 
@@ -581,6 +583,31 @@ export function QuranReader({ initialPage = 1 }: QuranReaderProps) {
             )}
           </>
         )}
+      </div>
+
+      {/* Bottom Page Navigation Toolbar */}
+      <div className="flex items-center justify-between p-3.5 sm:p-4 rounded-3xl glass-panel border border-[var(--border-color)] shadow-xs">
+        <button
+          onClick={handlePrevPage}
+          disabled={currentPageNum <= 1}
+          className="px-3.5 sm:px-4 py-2.5 rounded-2xl bg-white dark:bg-[#131F1A] hover:bg-gray-100 dark:hover:bg-[#1C2E27] disabled:opacity-25 text-gray-700 dark:text-gray-200 text-xs sm:text-sm font-extrabold transition-all flex items-center gap-1.5 shadow-2xs border border-gray-200/60 dark:border-white/10"
+        >
+          <ChevronRight className="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+          <span>{isAr ? 'الصفحة السابقة' : 'Previous Page'}</span>
+        </button>
+
+        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
+          {isAr ? `صفحة ${currentPageNum} من 604` : `Page ${currentPageNum} of 604`}
+        </span>
+
+        <button
+          onClick={handleNextPage}
+          disabled={currentPageNum >= 604}
+          className="shimmer-btn px-4 sm:px-5 py-2.5 rounded-2xl bg-[#F0CA50] hover:bg-[#D4AF37] disabled:opacity-25 text-[#0A261E] text-xs sm:text-sm font-extrabold transition-all flex items-center gap-1.5 shadow-xs"
+        >
+          <span>{isAr ? 'الصفحة التالية' : 'Next Page'}</span>
+          <ChevronLeft className="w-4 h-4 rtl:rotate-0 ltr:rotate-180" />
+        </button>
       </div>
 
       {/* Subtle Page Correction / Feedback Bar */}
