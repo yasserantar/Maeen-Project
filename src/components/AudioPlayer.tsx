@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, SkipForward, SkipBack, Gauge } from 'lucide-react';
 
 export interface AudioPlayerVerse {
@@ -23,13 +23,24 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentVerseIndex, setCurrentVerseIndex] = useState(0);
-  const [speedIndex, setSpeedIndex] = useState(1); // 1.0x
+  const [speedIndex, setSpeedIndex] = useState(1); // 1.0x by default
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const currentVerse = verses[currentVerseIndex];
-  const audioSrc = currentVerse?.audio_url || `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${currentVerse?.id || 1}.mp3`;
+  const getAudioUrl = (idx: number) => {
+    const v = verses[idx];
+    if (!v) return 'https://everyayah.com/data/Alafasy_128kbps/001001.mp3';
+    if (v.audio_url) return v.audio_url;
+    try {
+      const parts = v.verse_key.split(':');
+      const s = String(parseInt(parts[0])).padStart(3, '0');
+      const a = String(parseInt(parts[1])).padStart(3, '0');
+      return `https://everyayah.com/data/Alafasy_128kbps/${s}${a}.mp3`;
+    } catch {
+      return 'https://everyayah.com/data/Alafasy_128kbps/001001.mp3';
+    }
+  };
 
-  // Reset state when page changes (verses array changes)
+  // Reset when page / verses change
   useEffect(() => {
     setIsPlaying(false);
     setCurrentVerseIndex(0);
@@ -38,23 +49,34 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-  }, [verses, onActiveVerseChange]);
+  }, [verses]);
 
-  // Sync active verse highlight
+  // Sync highlight with current playing verse
   useEffect(() => {
     if (onActiveVerseChange) {
       onActiveVerseChange(isPlaying ? currentVerseIndex : null);
     }
   }, [currentVerseIndex, isPlaying, onActiveVerseChange]);
 
-  // Play audio whenever currentVerseIndex changes IF isPlaying is true
-  useEffect(() => {
-    if (isPlaying && audioRef.current) {
-      audioRef.current.src = audioSrc;
-      audioRef.current.playbackRate = PLAYBACK_SPEEDS[speedIndex];
-      audioRef.current.play().catch(e => console.warn('Audio play error', e));
+  const playVerse = (idx: number) => {
+    if (!audioRef.current) return;
+    const url = getAudioUrl(idx);
+    audioRef.current.src = url;
+    audioRef.current.playbackRate = PLAYBACK_SPEEDS[speedIndex];
+    audioRef.current.muted = isMuted;
+
+    const playPromise = audioRef.current.play();
+    if (playPromise !== undefined) {
+      playPromise
+        .then(() => {
+          setIsPlaying(true);
+        })
+        .catch((err) => {
+          console.warn('Playback error:', err);
+          setIsPlaying(false);
+        });
     }
-  }, [currentVerseIndex, isPlaying, audioSrc, speedIndex]);
+  };
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -62,32 +84,38 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.src = audioSrc;
-      audioRef.current.playbackRate = PLAYBACK_SPEEDS[speedIndex];
-      audioRef.current.play()
-        .then(() => setIsPlaying(true))
-        .catch(e => console.warn('Play error', e));
+      playVerse(currentVerseIndex);
     }
   };
 
   const handleEnded = () => {
     if (currentVerseIndex < verses.length - 1) {
-      setCurrentVerseIndex(prev => prev + 1);
+      const nextIdx = currentVerseIndex + 1;
+      setCurrentVerseIndex(nextIdx);
+      playVerse(nextIdx);
     } else {
       setIsPlaying(false);
       setCurrentVerseIndex(0);
     }
   };
 
-  const playNextVerse = () => {
+  const handleSkipNext = () => {
     if (currentVerseIndex < verses.length - 1) {
-      setCurrentVerseIndex(prev => prev + 1);
+      const nextIdx = currentVerseIndex + 1;
+      setCurrentVerseIndex(nextIdx);
+      if (isPlaying) {
+        playVerse(nextIdx);
+      }
     }
   };
 
-  const playPrevVerse = () => {
+  const handleSkipPrev = () => {
     if (currentVerseIndex > 0) {
-      setCurrentVerseIndex(prev => prev - 1);
+      const prevIdx = currentVerseIndex - 1;
+      setCurrentVerseIndex(prevIdx);
+      if (isPlaying) {
+        playVerse(prevIdx);
+      }
     }
   };
 
@@ -109,8 +137,8 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0A382C]/10 via-[#0F4C3A]/5 to-[#C9A227]/10 dark:from-[#132B22] dark:via-[#101F19] dark:to-[#2A230F] p-4 border border-[#0F4C3A]/15 dark:border-[#F0CA50]/30 shadow-xs backdrop-blur-md transition-all">
       <audio
         ref={audioRef}
-        src={audioSrc}
         onEnded={handleEnded}
+        preload="auto"
       />
 
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -118,7 +146,7 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
         <div className="flex items-center gap-2.5">
           {/* Previous Verse Button */}
           <button
-            onClick={playPrevVerse}
+            onClick={handleSkipPrev}
             disabled={currentVerseIndex <= 0}
             className="w-9 h-9 rounded-xl bg-white dark:bg-[#15241E] disabled:opacity-25 hover:bg-gray-100 dark:hover:bg-[#1C2E27] flex items-center justify-center transition-all shadow-2xs border border-gray-200/60 dark:border-white/10"
             title={isAr ? 'الآية السابقة' : 'Previous Verse'}
@@ -141,7 +169,7 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
 
           {/* Next Verse Button */}
           <button
-            onClick={playNextVerse}
+            onClick={handleSkipNext}
             disabled={currentVerseIndex >= verses.length - 1}
             className="w-9 h-9 rounded-xl bg-white dark:bg-[#15241E] disabled:opacity-25 hover:bg-gray-100 dark:hover:bg-[#1C2E27] flex items-center justify-center transition-all shadow-2xs border border-gray-200/60 dark:border-white/10"
             title={isAr ? 'الآية التالية' : 'Next Verse'}

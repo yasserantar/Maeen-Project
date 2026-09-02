@@ -129,6 +129,17 @@ function cleanText(html: string): string {
     .trim();
 }
 
+export function getAlafasyAudioUrl(verseKey: string): string {
+  try {
+    const parts = verseKey.split(':');
+    const surah = String(parseInt(parts[0])).padStart(3, '0');
+    const ayah = String(parseInt(parts[1])).padStart(3, '0');
+    return `https://everyayah.com/data/Alafasy_128kbps/${surah}${ayah}.mp3`;
+  } catch (e) {
+    return 'https://everyayah.com/data/Alafasy_128kbps/001001.mp3';
+  }
+}
+
 // Fallback data for Page 1 (Al-Fatihah)
 const PAGE_1_FALLBACK: QuranPageData = {
   page_number: 1,
@@ -136,13 +147,13 @@ const PAGE_1_FALLBACK: QuranPageData = {
   surah_name_en: 'Surah Al-Fatihah',
   juz_number: 1,
   verses: [
-    { id: 1, verse_key: '1:1', verse_number: 1, page_number: 1, text_uthmani: 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', translations: [{ id: 1, resource_id: 131, text: 'In the name of Allah, the Entirely Merciful, the Especially Merciful.' }] },
-    { id: 2, verse_key: '1:2', verse_number: 2, page_number: 1, text_uthmani: 'ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ', translations: [{ id: 1, resource_id: 131, text: '[All] praise is [due] to Allah, Lord of the worlds -' }] },
-    { id: 3, verse_key: '1:3', verse_number: 3, page_number: 1, text_uthmani: 'ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', translations: [{ id: 1, resource_id: 131, text: 'The Entirely Merciful, the Especially Merciful,' }] },
-    { id: 4, verse_key: '1:4', verse_number: 4, page_number: 1, text_uthmani: 'مَٰلِكِ يَوْمِ ٱلدِّينِ', translations: [{ id: 1, resource_id: 131, text: 'Sovereign of the Day of Recompense.' }] },
-    { id: 5, verse_key: '1:5', verse_number: 5, page_number: 1, text_uthmani: 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', translations: [{ id: 1, resource_id: 131, text: 'It is You we worship and You we ask for help.' }] },
-    { id: 6, verse_key: '1:6', verse_number: 6, page_number: 1, text_uthmani: 'ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ', translations: [{ id: 1, resource_id: 131, text: 'Guide us to the straight path -' }] },
-    { id: 7, verse_key: '1:7', verse_number: 7, page_number: 1, text_uthmani: 'صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ', translations: [{ id: 1, resource_id: 131, text: 'The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray.' }] },
+    { id: 1, verse_key: '1:1', verse_number: 1, page_number: 1, text_uthmani: 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', audio_url: 'https://everyayah.com/data/Alafasy_128kbps/001001.mp3', translations: [{ id: 1, resource_id: 131, text: 'In the name of Allah, the Entirely Merciful, the Especially Merciful.' }] },
+    { id: 2, verse_key: '1:2', verse_number: 2, page_number: 1, text_uthmani: 'ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ', audio_url: 'https://everyayah.com/data/Alafasy_128kbps/001002.mp3', translations: [{ id: 1, resource_id: 131, text: '[All] praise is [due] to Allah, Lord of the worlds -' }] },
+    { id: 3, verse_key: '1:3', verse_number: 3, page_number: 1, text_uthmani: 'ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', audio_url: 'https://everyayah.com/data/Alafasy_128kbps/001003.mp3', translations: [{ id: 1, resource_id: 131, text: 'The Entirely Merciful, the Especially Merciful,' }] },
+    { id: 4, verse_key: '1:4', verse_number: 4, page_number: 1, text_uthmani: 'مَٰلِكِ يَوْمِ ٱلدِّينِ', audio_url: 'https://everyayah.com/data/Alafasy_128kbps/001004.mp3', translations: [{ id: 1, resource_id: 131, text: 'Sovereign of the Day of Recompense.' }] },
+    { id: 5, verse_key: '1:5', verse_number: 5, page_number: 1, text_uthmani: 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', audio_url: 'https://everyayah.com/data/Alafasy_128kbps/001005.mp3', translations: [{ id: 1, resource_id: 131, text: 'It is You we worship and You we ask for help.' }] },
+    { id: 6, verse_key: '1:6', verse_number: 6, page_number: 1, text_uthmani: 'ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ', audio_url: 'https://everyayah.com/data/Alafasy_128kbps/001006.mp3', translations: [{ id: 1, resource_id: 131, text: 'Guide us to the straight path -' }] },
+    { id: 7, verse_key: '1:7', verse_number: 7, page_number: 1, text_uthmani: 'صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ', audio_url: 'https://everyayah.com/data/Alafasy_128kbps/001007.mp3', translations: [{ id: 1, resource_id: 131, text: 'The path of those upon whom You have bestowed favor, not of those who have evoked [Your] anger or of those who are astray.' }] },
   ],
   tafsir_sadi_ar: 'سورة الفاتحة مكية، وهي أعظم سورة في القرآن الكريم. اشتملت على إثبات التوحيد بأنواعه الثلاثة: توحيد الربوبية وتوحيد الألوهية وتوحيد الأسماء والصفات، وعلى إثبات النبوة والجزاء والأمر بالعبادة والاستعانة بالله وحده.',
   tafsir_ibn_kathir_ar: 'تسمى الفاتحة وأم الكتاب وأم القرآن والسبع المثاني. افتتح بها الكتاب وتستفتح بها القراءة في الصلاة، وتتضمن تماجيد الله والثناء عليه وطلب الهداية إلى الصراط المستقيم.',
@@ -184,7 +195,7 @@ export async function fetchQuranPage(pageNumber: number): Promise<QuranPageData>
       page_number: v.page_number,
       text_uthmani: v.text_uthmani,
       translations: v.translations || [],
-      audio_url: `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${v.id}.mp3`
+      audio_url: getAlafasyAudioUrl(v.verse_key)
     }));
 
     const firstVerse = verses[0];
