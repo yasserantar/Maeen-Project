@@ -151,7 +151,7 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
             className="w-9 h-9 rounded-xl bg-white dark:bg-[#15241E] disabled:opacity-25 hover:bg-gray-100 dark:hover:bg-[#1C2E27] flex items-center justify-center transition-all shadow-2xs border border-gray-200/60 dark:border-white/10"
             title={isAr ? 'الآية السابقة' : 'Previous Verse'}
           >
-            <SkipBack className="w-4 h-4 text-gray-700 dark:text-gray-200" />
+            <SkipBack className="w-4 h-4 text-gray-700 dark:text-gray-200 rtl:rotate-180" />
           </button>
 
           {/* Main Play / Pause Button */}
@@ -163,7 +163,7 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
             {isPlaying ? (
               <Pause className="w-5 h-5 fill-current" />
             ) : (
-              <Play className="w-5 h-5 fill-current ml-0.5" />
+              <Play className="w-5 h-5 fill-current ml-0.5 rtl:mr-0.5 rtl:ml-0" />
             )}
           </button>
 
@@ -174,7 +174,7 @@ export function AudioPlayer({ verses, title, isAr = true, onActiveVerseChange }:
             className="w-9 h-9 rounded-xl bg-white dark:bg-[#15241E] disabled:opacity-25 hover:bg-gray-100 dark:hover:bg-[#1C2E27] flex items-center justify-center transition-all shadow-2xs border border-gray-200/60 dark:border-white/10"
             title={isAr ? 'الآية التالية' : 'Next Verse'}
           >
-            <SkipForward className="w-4 h-4 text-gray-700 dark:text-gray-200" />
+            <SkipForward className="w-4 h-4 text-gray-700 dark:text-gray-200 rtl:rotate-180" />
           </button>
         </div>
 
